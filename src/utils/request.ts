@@ -3,7 +3,8 @@ import axios from 'axios'
 import { ElMessage } from 'element-plus';
 //第一步：利用axios对象的create方法，创建axios实例（其他的配置：请求超时，基础路径等）
 const request = axios.create({
-    baseURL: import.meta.env.VITE_APP_BASE_API, //基础路径
+    // baseURL: import.meta.env.VITE_APP_BASE_API, //基础路径
+    baseURL: '',
     timeout: 5000 //请求超时时间
 })
 //第二步：请求与响应拦截器

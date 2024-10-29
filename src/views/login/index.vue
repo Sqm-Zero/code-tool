@@ -28,6 +28,8 @@ import { reactive, ref } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 // 引入获取当前时间的函数
 import { getTime } from '@/utils/time';
+import  request from '@/utils/request'
+import { ElMessage } from 'element-plus';
 
 // 获取el-from表单
 let loginForms = ref();
@@ -47,7 +49,7 @@ const validatorUserName = (rule: any, value: string, callback: any) => {
     // rule: 即为校验规则对象
     // value: 即为表单元素文本内容
     // callback: 验证成功回调函数，验证失败回调函数
-    if (value.length >= 5) {
+    if (value.length >= 2) {
         callback()
     } else {
         callback(new Error('账号长度至少五位'))
@@ -75,11 +77,6 @@ const rules = {
 }
 // 登录按钮回调
 const login = async () => {
-    // 保证全部表单验证通过再发送请求
-    await loginForms.value.validate()
-
-    // 开始加载
-    loading.value = true
     
 }
 

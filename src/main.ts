@@ -11,13 +11,17 @@ import '@/styles/index.scss'
 import 'virtual:svg-icons-register'
 //引入自定义插件对象：注册整个项目的全局组件
 import globalComponent from '@/components/index'
- 
+//引入仓库
+import pinia from '@/store' 
+
+
 const app = createApp(App)
  
 app.use(ElementPlus, {
     locale: zhCn,
 })
- 
+//安装仓库
+app.use(pinia)
 //安装自定义插件
 app.use(globalComponent)
 //注册模版路由
