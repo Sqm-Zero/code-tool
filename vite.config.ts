@@ -29,16 +29,16 @@ export default defineConfig(({command,mode}) =>{
     // 代理跨域
     server: {
       proxy: {
-        // [env.VITE_APP_BASE_API]: {
-        //   // 获取数据服务器地址设置
-        //   target: env.VITE_SERVE,
-        //   // 是否需要代理跨域          
-        //   changeOrigin: true,
-        //   // 路径重写
-        //   rewrite: (path) => {
-        //     return path.replace(/^\/api/, '');
-        //   },
-        // }
+        '/api': {
+          // 获取数据服务器地址设置
+          target: 'http://localhost:8080/api',
+          // 是否需要代理跨域
+          changeOrigin: true,
+          // 路径重写
+          rewrite: (path) => {
+            return path.replace(/^\/api/, '');
+          },
+        }
       }
     }
   }
