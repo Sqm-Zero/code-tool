@@ -7,6 +7,7 @@ import { createSvgIconsPlugin } from 'vite-plugin-svg-icons'
 export default defineConfig(({command,mode}) =>{
   const env = loadEnv(mode, process.cwd());
   return {
+    base: './',
     plugins: [vue(),
     createSvgIconsPlugin({
       iconDirs: [path.resolve(process.cwd(), 'src/assets/icons')],
@@ -21,24 +22,24 @@ export default defineConfig(({command,mode}) =>{
     css: {
       preprocessorOptions: {
         scss: {
-          javascriptEnabled: true,
-          additionalData: `@import "@/styles/variable.scss";`
+          api: 'modern-compiler',
+          additionalData: `@use "@/styles/variable.scss" as *;`
         }
       }
     },
     // 代理跨域
     server: {
       proxy: {
-        // [env.VITE_APP_BASE_API]: {
-        //   // 获取数据服务器地址设置
-        //   target: env.VITE_SERVE,
-        //   // 是否需要代理跨域          
-        //   changeOrigin: true,
-        //   // 路径重写
-        //   rewrite: (path) => {
-        //     return path.replace(/^\/api/, '');
-        //   },
-        // }
+        [env.VITE_APP_BASE_API]: {
+          // 获取数据服务器地址设置
+          target: env.VITE_SERVE,
+          // 是否需要代理跨域          
+          changeOrigin: true,
+          // 路径重写
+          rewrite: (path) => {
+            return path.replace(/^\/api/, '');
+          },
+        }
       }
     }
   }

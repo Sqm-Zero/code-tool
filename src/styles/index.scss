@@ -1,2 +1,3 @@
 //引入清除默认样式
-@import './reset.scss'
+@forward  'variable.scss';
+@forward  'reset.scss';

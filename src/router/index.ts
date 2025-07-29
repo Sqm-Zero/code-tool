@@ -1,8 +1,8 @@
-import { createRouter, createWebHistory } from 'vue-router'
+import { createRouter, createWebHashHistory } from 'vue-router'
 import { constantRoute } from './routes'
 //创建路由器
 let router = createRouter({
-    history: createWebHistory(),
+    history: createWebHashHistory(),
     routes: constantRoute,
     //滚动行为
     scrollBehavior() {

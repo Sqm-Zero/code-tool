@@ -9,6 +9,14 @@ export const constantRoute = [
         }
     },
     {
+        path: '/test',
+        component: () => import('@/views/test/index.vue'),
+        name: 'test',
+        meta: {
+            title: '测试'
+        }
+    },
+    {
         path: '/login',
         component: () => import('@/views/login/index.vue'),
         name: 'login',
