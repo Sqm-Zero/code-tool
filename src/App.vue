@@ -1,79 +1,40 @@
 <template>
-  <div class="diagonal-layout">
-    <div class="background-container">
-      <div class="triangle light"></div>
-      <div class="triangle dark"></div>
-    </div>
-    
-    <div class="content-container">
+  <div>
+    <header class="nav">
+      <div class="brand" @click="$router.push('/')">Tools</div>
+      <nav class="links">
+        <router-link to="/">首页</router-link>
+        <router-link to="/tools/diff">代码对比</router-link>
+        <router-link to="/tools/json">JSON 格式化</router-link>
+        <router-link to="/tools/format">代码格式化</router-link>
+      </nav>
+    </header>
+    <main class="content">
       <router-view></router-view>
-    </div>
+    </main>
   </div>
+  
 </template>
 
 <script setup lang="ts">
-import {useDark, useToggle} from "@vueuse/core";
-
-//  深色切换
-useDark({
-  selector: 'html',
-  attribute: 'class',
-  valueLight: 'light',
-  valueDark: 'dark'
-})
-
-useDark({
-  onChanged(dark) {
-    useToggle(dark)
-  }
-})
 </script>
 
 <style scoped>
-.diagonal-layout {
-  position: relative;
-  width: 100%;
-  min-height: 100vh;
-}
-
-.background-container {
-  position: fixed;
-  width: 100%;
-  height: 100vh;
+.nav {
+  position: sticky;
   top: 0;
-  left: 0;
-  z-index: -1;
-  overflow: hidden;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  border-bottom: 1px solid #e5e7eb;
+  background: rgba(255,255,255,0.85);
+  backdrop-filter: saturate(180%) blur(8px);
 }
-
-.triangle {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-}
-
-.light {
-  background-color: #f8f9fa;
-  clip-path: polygon(100% 0, 0 0, 100% 100%);
-}
-
-.dark {
-  background-color: #212529;
-  clip-path: polygon(0 0, 0 100%, 100% 100%);
-}
-
-.content-container {
-  position: relative;
-  z-index: 1;
-  min-height: 100vh;
-}
-
-/* 深色模式适配 */
-.dark .light {
-  background-color: #1a1a1a;
-}
-
-.dark .dark {
-  background-color: #0d0d0d;
-}
+.brand { font-weight: 600; cursor: pointer; }
+.links { display: flex; gap: 14px; }
+.links a { color: #374151; text-decoration: none; padding: 4px 6px; border-radius: 4px; }
+.links a.router-link-active { background: #f3f4f6; color: #111827; }
+.content { padding: 8px 12px; }
 </style>

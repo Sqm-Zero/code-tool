@@ -9,6 +9,30 @@ export const constantRoute = [
         }
     },
     {
+        path: '/tools/diff',
+        component: () => import('@/views/tools/diff.vue'),
+        name: 'tools-diff',
+        meta: {
+            title: '代码对比'
+        }
+    },
+    {
+        path: '/tools/json',
+        component: () => import('@/views/tools/json.vue'),
+        name: 'tools-json',
+        meta: {
+            title: 'JSON格式化'
+        }
+    },
+    {
+        path: '/tools/format',
+        component: () => import('@/views/tools/format.vue'),
+        name: 'tools-format',
+        meta: {
+            title: '代码格式化'
+        }
+    },
+    {
         path: '/test',
         component: () => import('@/views/test/index.vue'),
         name: 'test',
