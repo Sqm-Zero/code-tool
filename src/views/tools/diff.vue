@@ -7,41 +7,40 @@
       <el-input v-model="left" type="textarea" :rows="16" placeholder="左侧（基准）" />
       <el-input v-model="right" type="textarea" :rows="16" placeholder="右侧（目标）" />
     </div>
-    <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-3">
-      <div class="editor readonly" v-html="leftRendered"></div>
-      <div class="editor readonly" v-html="rightRendered"></div>
+    <div class="mt-4">
+      <div class="editor readonly">
+        <pre v-html="rightRendered"></pre>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import { diffWordsWithSpace } from 'diff'
+import { diffChars } from 'diff'
 
 const left = ref('')
 const right = ref('')
-const leftRendered = ref('')
 const rightRendered = ref('')
 
 const escape = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
 
 const buildRendered = () => {
-  const parts = diffWordsWithSpace(left.value, right.value)
-  let leftHtml = ''
+  const parts = diffChars(left.value, right.value)
   let rightHtml = ''
   parts.forEach((part) => {
     if (part.added) {
+      // 右侧新增的内容，标绿
       rightHtml += `<span class=\"token added\">${escape(part.value)}</span>`
     } else if (part.removed) {
-      leftHtml += `<span class=\"token removed\">${escape(part.value)}</span>`
+      // 左侧有但右侧没有的内容，在右侧显示为删除（标红）
+      rightHtml += `<span class=\"token removed\">${escape(part.value)}</span>`
     } else {
-      const safe = escape(part.value)
-      leftHtml += `<span class=\"token equal\">${safe}</span>`
-      rightHtml += `<span class=\"token equal\">${safe}</span>`
+      // 相同内容，正常显示
+      rightHtml += `<span class=\"token equal\">${escape(part.value)}</span>`
     }
   })
-  leftRendered.value = wrapPre(leftHtml)
-  rightRendered.value = wrapPre(rightHtml)
+  rightRendered.value = rightHtml
 }
 
 function wrapPre(inner: string) {
