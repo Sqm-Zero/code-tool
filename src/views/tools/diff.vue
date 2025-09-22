@@ -42,10 +42,6 @@ const buildRendered = () => {
   })
   rightRendered.value = rightHtml
 }
-
-function wrapPre(inner: string) {
-  return `<pre class=\"pre\">${inner}</pre>`
-}
 </script>
 
 <style scoped>

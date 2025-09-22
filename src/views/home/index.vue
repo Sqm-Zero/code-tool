@@ -1,16 +1,369 @@
 <template>
-  <div class="p-6">
-    <h1 class="text-2xl mb-4">工具集合</h1>
-    <div class="flex flex-wrap gap-3">
-      <router-link to="/tools/diff"><el-button type="primary">代码对比</el-button></router-link>
-      <router-link to="/tools/json"><el-button>JSON 格式化</el-button></router-link>
-      <router-link to="/tools/format"><el-button>代码格式化</el-button></router-link>
+  <div class="home-container">
+    <div class="hero-section">
+      <div class="hero-content">
+        <h1 class="hero-title">开发工具集合</h1>
+        <p class="hero-subtitle">{{ displayText }}<span class="cursor">|</span></p>
+        <p class="text-white text-lg mt-4">作者：库库林-沙琪马</p>
+      </div>
+    </div>
+
+    <div class="tools-section">
+      <div class="tools-grid">
+        <div class="tool-card" @click="$router.push('/tools/diff')">
+          <div class="tool-icon diff-icon">📊</div>
+          <h3 class="tool-title">代码对比</h3>
+          <p class="tool-desc">快速对比两段代码的差异，支持字符级和词级对比</p>
+          <div class="tool-tags">
+            <span class="tag">diff</span>
+            <span class="tag">对比</span>
+          </div>
+        </div>
+
+        <div class="tool-card" @click="$router.push('/tools/json')">
+          <div class="tool-icon json-icon">🔧</div>
+          <h3 class="tool-title">JSON 格式化</h3>
+          <p class="tool-desc">美化和压缩 JSON 数据，支持键名排序</p>
+          <div class="tool-tags">
+            <span class="tag">json</span>
+            <span class="tag">格式化</span>
+          </div>
+        </div>
+
+        <div class="tool-card" @click="$router.push('/tools/format')">
+          <div class="tool-icon format-icon">⚡</div>
+          <h3 class="tool-title">代码格式化</h3>
+          <p class="tool-desc">支持多种语言的代码格式化，让代码更规范</p>
+          <div class="tool-tags">
+            <span class="tag">格式化</span>
+            <span class="tag">多语言</span>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
+import { ref, onMounted, onUnmounted } from 'vue';
+
+interface One {
+  id: string,
+  tag: string,
+  origin: string,
+  content: string;
+}
+
+let one = ref<One>({} as One);
+let displayText = ref('');
+let isTyping = ref(false);
+let isDeleting = ref(false);
+let timers: any[] = [];
+
+const getOne = async () => {
+  try {
+    // 直接使用 fetch 避免代理问题
+    const response = await fetch('https://api.xygeng.cn/one');
+    const data = await response.json();
+    console.log('API 响应:', data);
+
+    one.value = data.data || data;
+    startTypingAnimation();
+  } catch (error) {
+    console.error('获取一言失败:', error);
+    // 设置默认内容
+    one.value = {
+      id: '1',
+      tag: '默认',
+      origin: '系统',
+      content: '提升开发效率的实用工具'
+    };
+    startTypingAnimation();
+  }
+}
+
+const startTypingAnimation = () => {
+  if (!one.value.content) return;
+
+  let currentIndex = 0;
+  const text = one.value.content;
+
+  // 开始打字
+  isTyping.value = true;
+  isDeleting.value = false;
+
+  const typeText = () => {
+    if (currentIndex < text.length) {
+      displayText.value = text.substring(0, currentIndex + 1);
+      currentIndex++;
+      const timer = setTimeout(typeText, 100);
+      timers.push(timer);
+    } else {
+      // 打字完成，等待2秒后开始删除
+      const timer = setTimeout(() => {
+        isTyping.value = false;
+        isDeleting.value = true;
+        deleteText();
+      }, 2000);
+      timers.push(timer);
+    }
+  };
+
+  const deleteText = () => {
+    if (currentIndex > 0) {
+      currentIndex--;
+      displayText.value = text.substring(0, currentIndex);
+      const timer = setTimeout(deleteText, 50);
+      timers.push(timer);
+    } else {
+      // 删除完成，等待1秒后获取新内容
+      isDeleting.value = false;
+      const timer = setTimeout(() => {
+        getOne();
+      }, 1000);
+      timers.push(timer);
+    }
+  };
+
+  typeText();
+}
+
+const clearAllTimers = () => {
+  timers.forEach(timer => clearTimeout(timer));
+  timers = [];
+}
+
+onMounted(() => {
+  getOne();
+});
+
+onUnmounted(() => {
+  clearAllTimers();
+});
+
 </script>
 
 <style scoped>
+.home-container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background-size: 200% 100%;
+  animation: gradientMove 10s linear infinite;
+  padding: 0;
+}
+
+@keyframes gradientMove {
+  0% {
+    background-position: 0 0;
+  }
+
+  100% {
+    background-position: 100% 0%;
+  }
+}
+
+.hero-section {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 50vh;
+  text-align: center;
+  color: white;
+  position: relative;
+  overflow: hidden;
+}
+
+.hero-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000"><defs><radialGradient id="a" cx="50%" cy="50%"><stop offset="0%" stop-color="%23ffffff" stop-opacity="0.1"/><stop offset="100%" stop-color="%23ffffff" stop-opacity="0"/></radialGradient></defs><circle cx="200" cy="200" r="100" fill="url(%23a)"/><circle cx="800" cy="300" r="150" fill="url(%23a)"/><circle cx="400" cy="700" r="120" fill="url(%23a)"/></svg>') no-repeat center center;
+  background-size: cover;
+  opacity: 0.3;
+}
+
+.hero-content {
+  position: relative;
+  z-index: 1;
+}
+
+.hero-title {
+  font-size: 3.5rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  background: linear-gradient(90deg, #f2aacb, #16a2c0);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.hero-subtitle {
+  font-size: 1.25rem;
+  opacity: 0.9;
+  margin: 0;
+  font-weight: 300;
+  min-height: 1.5rem;
+  display: flex;
+  align-items: center;
+  background: linear-gradient(90deg, #ffffff,#adecff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.cursor {
+  animation: blink 1s infinite;
+  margin-left: 2px;
+}
+
+@keyframes blink {
+
+  0%,
+  50% {
+    opacity: 1;
+  }
+
+  51%,
+  100% {
+    opacity: 0;
+  }
+}
+
+.tools-section {
+  padding: 4rem 2rem;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+}
+
+.tools-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.tool-card {
+  background: white;
+  border-radius: 16px;
+  padding: 2rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  cursor: pointer;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  position: relative;
+  overflow: hidden;
+  opacity: 0;
+  animation: fadeIn 1s ease forwards;
+}
+
+@keyframes fadeIn {
+  to {
+    opacity: 1;
+  }
+}
+
+.tool-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #667eea, #764ba2);
+  transform: scaleX(0);
+  transition: transform 0.3s ease;
+}
+
+.tool-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+}
+
+.tool-card:hover::before {
+  transform: scaleX(1);
+}
+
+.tool-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  display: block;
+}
+
+.diff-icon {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.json-icon {
+  background: linear-gradient(135deg, #f093fb, #f5576c);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.format-icon {
+  background: linear-gradient(135deg, #4facfe, #00f2fe);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.tool-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+  color: #1f2937;
+}
+
+.tool-desc {
+  color: #6b7280;
+  line-height: 1.6;
+  margin-bottom: 1.5rem;
+  font-size: 0.95rem;
+}
+
+.tool-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.tag {
+  background: #f3f4f6;
+  color: #374151;
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.tool-card:hover .tag {
+  background: #e5e7eb;
+  transform: scale(1.05);
+}
+
+@media (max-width: 768px) {
+  .hero-title {
+    font-size: 2.5rem;
+  }
+
+  .hero-subtitle {
+    font-size: 1rem;
+  }
+
+  .tools-section {
+    padding: 2rem 1rem;
+  }
+
+  .tool-card {
+    padding: 1.5rem;
+  }
+}
 </style>
