@@ -150,6 +150,7 @@ onUnmounted(() => {
   background-size: 200% 100%;
   animation: gradientMove 10s linear infinite;
   padding: 0;
+  position: relative;
 }
 
 @keyframes gradientMove {
@@ -209,7 +210,7 @@ onUnmounted(() => {
   min-height: 1.5rem;
   display: flex;
   align-items: center;
-  background: linear-gradient(90deg, #ffffff,#adecff);
+  background: linear-gradient(90deg, #ffffff, #adecff);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
@@ -236,6 +237,9 @@ onUnmounted(() => {
   padding: 4rem 2rem;
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(10px);
+  min-height: 50vh;
+  position: relative;
+  z-index: 1;
 }
 
 .tools-grid {
@@ -365,5 +369,25 @@ onUnmounted(() => {
   .tool-card {
     padding: 1.5rem;
   }
+}
+</style>
+
+<style>
+/* 全局滚动条样式 */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #6d2525;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #5a1f1f;
 }
 </style>
