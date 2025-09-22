@@ -3,7 +3,7 @@
     <div class="hero-section">
       <div class="hero-content">
         <h1 class="hero-title">开发工具集合</h1>
-        <p class="hero-subtitle">{{ displayText }}<span class="cursor">|</span></p>
+        <p class="hero-subtitle">{{ obj.output }}<span class="easy-typed-cursor">|</span></p>
         <p class="text-white text-lg mt-4">作者：库库林-沙琪马</p>
       </div>
     </div>
@@ -45,100 +45,42 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue';
+import { onMounted, reactive } from 'vue';
+import EasyTyper from "easy-typer-js";
 
-interface One {
-  id: string,
-  tag: string,
-  origin: string,
-  content: string;
-}
 
-let one = ref<One>({} as One);
-let displayText = ref('');
-let isTyping = ref(false);
-let isDeleting = ref(false);
-let timers: any[] = [];
-
-const getOne = async () => {
-  try {
-    // 直接使用 fetch 避免代理问题
-    const response = await fetch('https://api.xygeng.cn/one');
-    const data = await response.json();
-    console.log('API 响应:', data);
-
-    one.value = data.data || data;
-    startTypingAnimation();
-  } catch (error) {
-    console.error('获取一言失败:', error);
-    // 设置默认内容
-    one.value = {
-      id: '1',
-      tag: '默认',
-      origin: '系统',
-      content: '提升开发效率的实用工具'
-    };
-    startTypingAnimation();
-  }
-}
-
-const startTypingAnimation = () => {
-  if (!one.value.content) return;
-
-  let currentIndex = 0;
-  const text = one.value.content;
-
-  // 开始打字
-  isTyping.value = true;
-  isDeleting.value = false;
-
-  const typeText = () => {
-    if (currentIndex < text.length) {
-      displayText.value = text.substring(0, currentIndex + 1);
-      currentIndex++;
-      const timer = setTimeout(typeText, 100);
-      timers.push(timer);
-    } else {
-      // 打字完成，等待2秒后开始删除
-      const timer = setTimeout(() => {
-        isTyping.value = false;
-        isDeleting.value = true;
-        deleteText();
-      }, 2000);
-      timers.push(timer);
-    }
-  };
-
-  const deleteText = () => {
-    if (currentIndex > 0) {
-      currentIndex--;
-      displayText.value = text.substring(0, currentIndex);
-      const timer = setTimeout(deleteText, 50);
-      timers.push(timer);
-    } else {
-      // 删除完成，等待1秒后获取新内容
-      isDeleting.value = false;
-      const timer = setTimeout(() => {
-        getOne();
-      }, 1000);
-      timers.push(timer);
-    }
-  };
-
-  typeText();
-}
-
-const clearAllTimers = () => {
-  timers.forEach(timer => clearTimeout(timer));
-  timers = [];
-}
-
-onMounted(() => {
-  getOne();
+const obj = reactive({
+  output: "喜欢就是让人变得束手无策",
+  isEnd: false,
+  speed: 300,
+  singleBack: false,
+  sleep: 0,
+  type: "rollback",
+  backSpeed: 100,
+  sentencePause: false,
 });
 
-onUnmounted(() => {
-  clearAllTimers();
+let myYiYan = "https://v1.hitokoto.cn/?c=a&encode=json"
+
+const fetchData = () => {
+  fetch(myYiYan)
+    .then((res) => {
+      return res.json();
+    })
+    .then(({ hitokoto }) => {
+      new EasyTyper(
+        obj,
+        hitokoto,
+        () => {
+          fetchData()
+        },
+        () => { }
+      );
+    });
+};
+
+onMounted(() => {
+  fetchData();
 });
 
 </script>
