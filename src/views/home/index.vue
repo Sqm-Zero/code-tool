@@ -10,33 +10,51 @@
 
     <div class="tools-section">
       <div class="tools-grid">
-        <div class="tool-card" @click="$router.push('/tools/diff')">
-          <div class="tool-icon diff-icon">📊</div>
-          <h3 class="tool-title">代码对比</h3>
-          <p class="tool-desc">快速对比两段代码的差异，支持字符级和词级对比</p>
-          <div class="tool-tags">
-            <span class="tag">diff</span>
-            <span class="tag">对比</span>
+        <div class="card" @click="$router.push('/tools/diff')">
+          <div class="card-inner shine-effect">
+            <div class="card-face card-front">
+              <div class="tool-icon diff-icon">📊</div>
+              <h3 class="tool-title">代码对比</h3>
+            </div>
+            <div class="card-face card-back">
+              <p class="tool-desc">快速对比两段代码的差异，支持字符级和词级对比</p>
+              <div class="tool-tags">
+                <span class="tag">diff</span>
+                <span class="tag">对比</span>
+              </div>
+            </div>
           </div>
         </div>
 
-        <div class="tool-card" @click="$router.push('/tools/json')">
-          <div class="tool-icon json-icon">🔧</div>
-          <h3 class="tool-title">JSON 格式化</h3>
-          <p class="tool-desc">美化和压缩 JSON 数据，支持键名排序</p>
-          <div class="tool-tags">
-            <span class="tag">json</span>
-            <span class="tag">格式化</span>
+        <div class="card" @click="$router.push('/tools/json')">
+          <div class="card-inner shine-effect">
+            <div class="card-face card-front">
+              <div class="tool-icon json-icon">🔧</div>
+              <h3 class="tool-title">JSON 格式化</h3>
+            </div>
+            <div class="card-face card-back">
+              <p class="tool-desc">美化和压缩 JSON 数据，支持键名排序</p>
+              <div class="tool-tags">
+                <span class="tag">json</span>
+                <span class="tag">格式化</span>
+              </div>
+            </div>
           </div>
         </div>
 
-        <div class="tool-card" @click="$router.push('/tools/format')">
-          <div class="tool-icon format-icon">⚡</div>
-          <h3 class="tool-title">代码格式化</h3>
-          <p class="tool-desc">支持多种语言的代码格式化，让代码更规范</p>
-          <div class="tool-tags">
-            <span class="tag">格式化</span>
-            <span class="tag">多语言</span>
+        <div class="card" @click="$router.push('/tools/format')">
+          <div class="card-inner shine-effect">
+            <div class="card-face card-front">
+              <div class="tool-icon format-icon">⚡</div>
+              <h3 class="tool-title">代码格式化</h3>
+            </div>
+            <div class="card-face card-back">
+              <p class="tool-desc">支持多种语言的代码格式化，让代码更规范</p>
+              <div class="tool-tags">
+                <span class="tag">格式化</span>
+                <span class="tag">多语言</span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -97,11 +115,15 @@ onMounted(() => {
 
 @keyframes gradientMove {
   0% {
-    background-position: 0 0;
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
   }
 
   100% {
-    background-position: 100% 0%;
+    background-position: 0% 50%;
   }
 }
 
@@ -185,31 +207,78 @@ onMounted(() => {
 }
 
 .tools-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
   gap: 2rem;
   max-width: 1200px;
   margin: 0 auto;
 }
 
-.tool-card {
-  background: white;
-  border-radius: 16px;
-  padding: 2rem;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-  transition: all 0.3s ease;
+/* 翻转卡片布局 */
+.card {
+  width: 270px;
+  height: 300px;
+  perspective: 1500px;
   cursor: pointer;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.card-inner {
   position: relative;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+  border-radius: 15px;
+}
+
+.card:hover .card-inner {
+  transform: rotateY(180deg);
+}
+
+.card-face {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden;
+  border-radius: 15px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
   overflow: hidden;
-  opacity: 0;
-  animation: fadeIn 1s ease forwards;
+}
+
+.card-front {
+  background: linear-gradient(135deg, #ee6ef5, #57b9ff);
+  background-size: 200% 200%;
+  animation: cardGradientShift 10s linear infinite;
+  color: white;
+}
+
+.card-back {
+  background: linear-gradient(135deg, #ff758c 0%, #ff7eb3 100%);
+  color: white;
+  transform: rotateY(180deg);
+}
+
+.card:hover .shine-effect::before {
+  transform: translate(50%, 50%) rotate(45deg);
 }
 
 @keyframes fadeIn {
   to {
     opacity: 1;
   }
+}
+
+/* 让卡片正面的背景渐变形成闭环：去程与回程在同一动画中完成，避免跳变 */
+@keyframes cardGradientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
 }
 
 .tool-card::before {
@@ -228,6 +297,10 @@ onMounted(() => {
   transform: translateY(-8px);
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
 }
+
+/* .tool-card:hover .tool-icon{
+  transform: translateX(40%);
+} */
 
 .tool-card:hover::before {
   transform: scaleX(1);
@@ -270,6 +343,7 @@ onMounted(() => {
 .tool-desc {
   color: #6b7280;
   line-height: 1.6;
+  font-weight: bold;
   margin-bottom: 1.5rem;
   font-size: 0.95rem;
 }
