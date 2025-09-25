@@ -17,6 +17,19 @@ import "@/styles/tailwind.css";
 
 const app = createApp(App)
 
+const defaultTitle = import.meta.env.VITE_APP_TITLE || '默认标题'
+// 设置初始标题
+document.title = defaultTitle
+
+// 监听页面可见性变化
+document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+        document.title = '|w`)哎呦~页面不见了~'
+    } else {
+        // 页面可见：恢复原标题
+        document.title = defaultTitle
+    }
+})
 
 app.use(ElementPlus, {
     locale: zhCn,
