@@ -38,8 +38,6 @@ const iconClass = computed(() => {
 
 <style scoped>
 .card {
-    width: 270px;
-    height: 300px;
     perspective: 1500px;
     cursor: pointer;
 }

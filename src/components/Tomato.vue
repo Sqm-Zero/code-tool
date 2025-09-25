@@ -1,5 +1,5 @@
 <template>
-    <div class="motto-card mb-4 flex flex-col min-w-full relative">
+    <div class="card mb-4 flex flex-col min-w-full relative">
         <!-- 设置图标（右上角） -->
         <button @click="showSettings = !showSettings" class="absolute top-0 right-0 p-1 text-white/60 hover:text-white"
             aria-label="设置">
@@ -173,3 +173,15 @@ onUnmounted(() => {
     if (timerId.value) clearInterval(timerId.value)
 })
 </script>
+<style scoped lang="scss">
+.card {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 12px;
+    padding: 0.75rem 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+</style>

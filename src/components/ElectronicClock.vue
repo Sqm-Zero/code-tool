@@ -1,5 +1,5 @@
 <template>
-    <div class="motto-card mb-4 flex flex-col min-w-full">
+    <div class="card mb-4 flex flex-col min-w-full">
         <div class="mb-2 font-black text-2xl">
             🕒电子时钟
         </div>
@@ -32,4 +32,15 @@ onMounted(() => {
 });
 </script>
 
-<style scoped></style>
+<style scoped lang="scss">
+.card {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 12px;
+    padding: 0.75rem 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+</style>

@@ -87,7 +87,7 @@
           <Tomato />
         </div>
       </div>
-      <div class="tools-grid max-w-6xl mx-auto">
+      <div class="grid grid-cols-3 gap-8 h-[24rem] max-w-6xl mx-auto">
         <ToolCard v-for="tool in tools" :key="tool.path" :tool="tool" />
       </div>
     </div>
