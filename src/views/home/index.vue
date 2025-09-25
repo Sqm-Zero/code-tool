@@ -81,21 +81,7 @@
     <div class="tools-section p-4 sm:p-8 md:p-12 lg:p-16 flex-1 min-w-0">
       <div class="grid grid-cols-2 gap-8">
         <!-- 时钟 -->
-        <div class="motto-card mb-4 flex flex-col min-w-full">
-          <div class="mb-2 font-black text-2xl">
-            🕒电子时钟
-          </div>
-          <div class="flex flex-col justify-between items-center">
-            <!-- 年月日 星期 -->
-            <div class="font-mono">
-              {{ formatter }}
-            </div>
-            <div class="text-2xl md:text-3xl text-white font-mono font-thin mt-1">
-              <!-- 时分秒 -->
-              {{ currentTime }}
-            </div>
-          </div>
-        </div>
+        <ElectronicClock />
         <!-- 番茄钟 -->
         <div>
           <Tomato />
@@ -111,9 +97,9 @@
 <script setup lang="ts">
 import ToolCard from '@/components/ToolCard.vue';
 import Tomato from '@/components/Tomato.vue';
-import { ref, onMounted, reactive, onUnmounted } from 'vue';
+import ElectronicClock from '@/components/ElectronicClock.vue';
+import { onMounted, reactive, onUnmounted } from 'vue';
 import EasyTyper from "easy-typer-js";
-import { formatYYYYMMDDWithWeek, formatHHmmss } from '@/utils/date'
 
 // 工具列表数据
 const tools = [
@@ -176,18 +162,8 @@ const fetchData = () => {
     });
 };
 
-// 电子时钟
-const formatter = ref(formatYYYYMMDDWithWeek());
-const currentTime = ref<string>('');
-
 onMounted(() => {
   fetchData();
-
-  // 初始化时钟
-  currentTime.value = formatHHmmss()
-  setInterval(() => {
-    currentTime.value = formatHHmmss()
-  }, 1000)
 });
 
 onUnmounted(() => {

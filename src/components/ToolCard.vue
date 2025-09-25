@@ -107,7 +107,17 @@ const iconClass = computed(() => {
     font-size: 3rem;
     margin-bottom: 1rem;
     display: block;
+    /* animation: tumble_move 2s infinite ease-in-out; */
 }
+
+/* @keyframes tumble_move {
+    0%, 100% {
+        transform: translateY(0) rotate(0deg);
+    }
+    50% {
+        transform: translateY(-10px) rotate(20deg);
+    }
+} */
 
 .diff-icon {
     background: linear-gradient(135deg, #667eea, #764ba2);
