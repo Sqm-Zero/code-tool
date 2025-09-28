@@ -1,6 +1,6 @@
 <template>
   <div>
-    <header class="nav">
+    <!-- <header class="nav">
       <div class="brand" @click="$router.push('/')">Tools</div>
       <nav class="links">
         <router-link to="/">首页</router-link>
@@ -8,7 +8,7 @@
         <router-link to="/tools/json">JSON 格式化</router-link>
         <router-link to="/tools/format">代码格式化</router-link>
       </nav>
-    </header>
+    </header> -->
     <main class="content">
       <router-view></router-view>
     </main>

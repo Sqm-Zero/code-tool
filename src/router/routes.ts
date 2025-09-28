@@ -33,6 +33,14 @@ export const constantRoute = [
         }
     },
     {
+        path: '/tools/timestamp',
+        component: () => import('@/views/tools/timestampConverter.vue'),
+        name: 'tools-timestamp',
+        meta: {
+            title: '时间戳转换'
+        }
+    },
+    {
         path: '/test',
         component: () => import('@/views/test/index.vue'),
         name: 'test',

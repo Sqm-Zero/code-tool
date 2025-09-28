@@ -1,7 +1,7 @@
 <template>
   <div class="home-container flex max-h-full relative max-md:flex-col">
     <!-- 装饰性背景元素 -->
-    <div class="z-[-1] min-h-screen absolute inset-0 overflow-hidden pointer-events-none">
+    <div class="z-0 min-h-screen absolute inset-0 overflow-hidden pointer-events-none">
       <div class="bubble bubble-1"></div>
       <div class="bubble bubble-2"></div>
       <div class="bubble bubble-3"></div>
@@ -81,13 +81,15 @@
     <div class="tools-section p-4 sm:p-8 md:p-12 lg:p-16 flex-1 min-w-0">
       <div class="grid grid-cols-2 gap-8">
         <!-- 时钟 -->
-        <ElectronicClock />
+        <div>
+          <ElectronicClock />
+        </div>
         <!-- 番茄钟 -->
         <div>
           <Tomato />
         </div>
       </div>
-      <div class="grid grid-cols-3 gap-8 h-[24rem] max-w-6xl mx-auto">
+      <div class="grid grid-cols-4 gap-8 h-[16rem] max-w-6xl mx-auto">
         <ToolCard v-for="tool in tools" :key="tool.path" :tool="tool" />
       </div>
     </div>
@@ -123,6 +125,13 @@ const tools = [
     title: '代码格式化',
     description: '支持多种语言的代码格式化，让代码更规范',
     tags: ['格式化', '多语言']
+  },
+  {
+    path: '/tools/timestamp',
+    icon: '⏱️',
+    title: '时间戳转化',
+    description: '支持秒/毫秒互转、多种格式解析、一键复制',
+    tags: ['时间戳', '转换', '复制']
   }
 ];
 
@@ -181,8 +190,9 @@ onUnmounted(() => {
   position: relative;
   height: 100vh;
   /* 确保占据整个视口高度 */
-  overflow: hidden;
+  overflow-x: hidden;
   /* 隐藏主容器滚动条 */
+  min-height: 100vh;
 }
 
 @keyframes gradientMove {
@@ -558,22 +568,26 @@ onUnmounted(() => {
   justify-items: center;
 }
 
-/* 响应式优化 */
 @media (max-width: 768px) {
-  .profile-container {
-    padding: 0 1rem;
+  .bubble-1 {
+    width: 80px;
+    height: 80px;
+    top: 5%;
+    left: 5%;
   }
 
-  .username {
-    font-size: 1.5rem;
+  .bubble-2 {
+    width: 50px;
+    height: 50px;
+    top: 70%;
+    right: 10%;
   }
 
-  .motto-text {
-    font-size: 0.85rem;
-  }
-
-  .tools-section {
-    padding: 2rem 1rem;
+  .bubble-3 {
+    width: 40px;
+    height: 40px;
+    bottom: 10%;
+    left: 10%;
   }
 }
 </style>
