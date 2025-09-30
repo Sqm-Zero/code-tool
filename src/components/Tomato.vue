@@ -1,6 +1,6 @@
 <template>
-    <div class="pomodoro-card mb-4 flex flex-col min-w-full relative">
-        <div class="absolute font-size: 1.25rem; top-0 left-0 p-2 text-white/70">
+    <div class="pomodoro-card mb-4 flex flex-col w-full relative">
+        <div class="absolute top-0 left-0 p-2 text-white/70">
             🍅 番茄钟
         </div>
 
@@ -11,23 +11,12 @@
         </button>
 
         <div class="flex flex-col justify-between items-center relative">
-            <!-- 模式选择按钮 -->
-            <div class="flex gap-2 mt-1 mb-4">
-                <button @click="setMode('work')" :class="currentMode === 'work' ? 'bg-red-600' : 'bg-gray-700'"
-                    class="text-xs px-3 py-1.5 rounded text-white transition-colors duration-200">
-                    工作 ({{ focusMinutes }} min)
-                </button>
-                <button @click="setMode('shortBreak')"
-                    :class="currentMode === 'shortBreak' ? 'bg-green-600' : 'bg-gray-700'"
-                    class="text-xs px-3 py-1.5 rounded text-white transition-colors duration-200">
-                    短休 ({{ shortBreakMinutes }} min)
-                </button>
-                <button @click="setMode('longBreak')"
-                    :class="currentMode === 'longBreak' ? 'bg-blue-600' : 'bg-gray-700'"
-                    class="text-xs px-3 py-1.5 rounded text-white transition-colors duration-200">
-                    长休 ({{ longBreakMinutes }} min)
-                </button>
-            </div>
+            <!-- 模式选择：标签页替代按钮 -->
+            <el-tabs v-model="activeTab" type="card" class="mt-[0.125rem] mb-2 compact-tabs" @tab-click="onTabClick">
+                <el-tab-pane label="工作" name="work" />
+                <el-tab-pane label="短休" name="shortBreak" />
+                <el-tab-pane label="长休" name="longBreak" />
+            </el-tabs>
 
             <div class="flex justify-center items-center">
                 <!-- 倒计时 -->
@@ -39,36 +28,39 @@
             </div>
         </div>
 
-        <!-- 设置面板 -->
-        <div v-show="showSettings" class="settings-panel mt-4 p-4 bg-black/30 rounded-lg w-full text-white">
-            <h4 class="font-bold text-lg mb-3">设置</h4>
-            <div class="grid grid-cols-2 gap-x-4 gap-y-3 text-sm">
-                <label class="flex items-center">专注 (分钟)</label>
-                <input v-model.number="focusMinutes" type="number" min="1" max="60"
-                    class="bg-white/10 text-white rounded px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-blue-400">
-
-                <label class="flex items-center">短休 (分钟)</label>
-                <input v-model.number="shortBreakMinutes" type="number" min="1" max="30"
-                    class="bg-white/10 text-white rounded px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-blue-400">
-
-                <label class="flex items-center">长休 (分钟)</label>
-                <input v-model.number="longBreakMinutes" type="number" min="1" max="60"
-                    class="bg-white/10 text-white rounded px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-blue-400">
-
-                <label class="flex items-center">长休间隔</label>
-                <input v-model.number="longBreakInterval" type="number" min="1" max="10"
-                    class="bg-white/10 text-white rounded px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-blue-400">
-            </div>
-            <div class="mt-3 text-xs text-white/60">
-                每完成 {{ longBreakInterval }} 个番茄后进入长休息
-            </div>
-        </div>
+        <!-- 设置弹窗 -->
+        <el-dialog v-model="showSettings" title="番茄钟设置" width="420px" append-to-body>
+            <el-form label-width="110px" size="small">
+                <el-form-item label="专注 (分钟)">
+                    <el-input-number v-model="focusMinutes" :min="1" :max="60" />
+                </el-form-item>
+                <el-form-item label="短休 (分钟)">
+                    <el-input-number v-model="shortBreakMinutes" :min="1" :max="30" />
+                </el-form-item>
+                <el-form-item label="长休 (分钟)">
+                    <el-input-number v-model="longBreakMinutes" :min="1" :max="60" />
+                </el-form-item>
+                <el-form-item label="长休间隔">
+                    <el-input-number v-model="longBreakInterval" :min="1" :max="10" />
+                </el-form-item>
+                <div class="text-xs text-white/60 mt-1">
+                    每完成 {{ longBreakInterval }} 个番茄后进入长休息
+                </div>
+            </el-form>
+            <template #footer>
+                <span class="dialog-footer">
+                    <el-button @click="showSettings = false">取消</el-button>
+                    <el-button type="primary" @click="applySettings">保存</el-button>
+                </span>
+            </template>
+        </el-dialog>
     </div>
 </template>
 
 <script setup lang="ts">
 import { useInterval } from '@/utils/useInterval';
 import { computed, onMounted, ref, watchEffect } from 'vue';
+import { ElTabs, ElTabPane, ElDialog, ElForm, ElFormItem, ElInputNumber, ElButton } from 'element-plus'
 
 // --- 配置项和状态 ---
 const focusMinutes = ref(parseInt(localStorage.getItem('pomodoroFocus') || '25'));
@@ -83,12 +75,19 @@ const timeLeft = ref(focusMinutes.value * 60) // 剩余时间（秒）
 const initialTime = ref(focusMinutes.value * 60); // 记录当前模式的初始总时间
 
 const showSettings = ref(false)
+const activeTab = ref<PomodoroMode>('work')
 
 const setMode = (mode: PomodoroMode) => {
     pause(); // 切换模式时暂停计时器
     currentMode.value = mode;
     setTimeByMode(mode); // 根据新模式设置时间
 };
+
+const onTabClick = (pane: any) => {
+    const name = pane.paneName as PomodoroMode
+    activeTab.value = name
+    setMode(name)
+}
 
 // --- 音效和通知 ---
 const dingAudio = new Audio('/ding.mp3'); 
@@ -167,6 +166,12 @@ const reset = () => {
     currentCycle.value = 0;
     setMode('work'); // 重置为工作模式，并更新时间
 };
+
+const applySettings = () => {
+    // 应用设置并关闭弹窗
+    setTimeByMode(currentMode.value)
+    showSettings.value = false
+}
 
 // --- 计算属性 ---
 const pomodoroTime = computed(() => {
@@ -269,6 +274,7 @@ const toggleSettings = () => {
     /* 默认文字颜色 */
     text-shadow: 0 0 5px rgba(255, 255, 255, 0.2);
     /* 轻微发光 */
+    box-sizing: border-box;
 }
 
 /* 引入数字字体，例如 Orbitron 或 Digital-7 */

@@ -20,7 +20,7 @@
               src="https://files.catbox.moe/ej1gq0" alt="kkl-sqm">
             <!-- 状态指示器 -->
             <div class="status-indicator"></div>
-          </div>
+            </div>
 
           <!-- 信息区域 -->
           <div class="info-section">
@@ -28,7 +28,7 @@
             <div class="motto-card mb-4">
               <span class="motto-icon">✨</span>
               <p class="motto-text">莫愁前路无知己，天下谁人不识君</p>
-            </div>
+              </div>
 
             <!-- 用户名 -->
             <div class="name-section">
@@ -36,8 +36,8 @@
               <div class="user-badges">
                 <span class="badge badge-pro">PRO</span>
                 <span class="badge badge-dev">开发者</span>
-              </div>
             </div>
+          </div>
 
             <!-- 社交链接 -->
             <div class="social-links">
@@ -58,10 +58,10 @@
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                     d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                 </svg>
-              </a>
-            </div>
+            </a>
           </div>
         </div>
+          </div>
 
         <!-- 一言展示区 -->
         <div class="quote-section mt-12 max-md:hidden">
@@ -73,25 +73,25 @@
             </p>
             <span class="quote-mark quote-mark-right">"</span>
           </div>
-        </div>
-      </div>
-    </div>
+          </div>
+            </div>
+          </div>
 
     <!-- 右侧工具区 -->
     <div class="tools-section p-4 sm:p-8 md:p-12 lg:p-16 flex-1 min-w-0">
-      <div class="grid grid-cols-2 gap-8">
+      <div class="grid grid-cols-2 gap-8 max-lg:flex max-lg:flex-col">
         <!-- 时钟 -->
-        <div>
+        <div class="w-full max-w-[560px] mx-auto">
           <ElectronicClock />
         </div>
         <!-- 番茄钟 -->
-        <div>
+        <div class="w-full max-w-[560px] mx-auto">
           <Tomato />
         </div>
-      </div>
-      <div class="grid grid-cols-4 gap-8 h-[16rem] max-w-6xl mx-auto">
+        </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8 h-[16rem] max-w-6xl mx-auto">
         <ToolCard v-for="tool in tools" :key="tool.path" :tool="tool" />
-      </div>
+            </div>
     </div>
   </div>
 </template>
@@ -168,7 +168,7 @@ const fetchData = () => {
     .catch(err => {
       console.error('Failed to fetch:', err);
       setTimeout(fetchData, 5000); // 错误重试
-    });
+  });
 };
 
 onMounted(() => {
@@ -185,8 +185,9 @@ onUnmounted(() => {
 <style scoped>
 .home-container {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  background-size: 200% 100%;
-  animation: gradientMove 10s linear infinite;
+  background-size: 140% 140%;
+  animation: gradientMove 30s ease-in-out infinite;
+  will-change: background-position;
   position: relative;
   height: 100vh;
   /* 确保占据整个视口高度 */
@@ -196,17 +197,9 @@ onUnmounted(() => {
 }
 
 @keyframes gradientMove {
-  0% {
-    background-position: 0% 50%;
-  }
-
-  50% {
-    background-position: 100% 50%;
-  }
-
-  100% {
-    background-position: 0% 50%;
-  }
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
 }
 
 /* 左侧边栏 */
@@ -219,8 +212,8 @@ onUnmounted(() => {
   position: absolute;
   border-radius: 50%;
   background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.1));
-  filter: blur(1px);
-  animation: float 20s infinite ease-in-out;
+  filter: blur(0.5px);
+  animation: float 28s infinite ease-in-out;
 }
 
 .bubble-1 {
@@ -281,11 +274,11 @@ onUnmounted(() => {
   position: absolute;
   inset: -4px;
   background: linear-gradient(45deg, #f3ec78, #af4261, #f3ec78);
-  background-size: 400% 400%;
+  background-size: 240% 240%;
   border-radius: 50%;
-  opacity: 0.8;
-  filter: blur(15px);
-  animation: glowAnimation 6s ease infinite;
+  opacity: 0.55;
+  filter: blur(10px);
+  animation: glowAnimation 12s ease-in-out infinite;
 }
 
 @keyframes glowAnimation {
@@ -488,8 +481,8 @@ onUnmounted(() => {
 
 .quote-card {
   position: relative;
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(6px);
   border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 16px;
   padding: 1.5rem;
@@ -567,7 +560,6 @@ onUnmounted(() => {
   gap: 2rem;
   justify-items: center;
 }
-
 @media (max-width: 768px) {
   .bubble-1 {
     width: 80px;

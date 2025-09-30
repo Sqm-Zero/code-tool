@@ -1,11 +1,11 @@
 <template>
-    <div class="clock-card">
+    <div class="clock-card w-full">
         <div class="clock-header">
             <span class="clock-icon">🕒</span>
             <h3 class="clock-title">电子时钟</h3>
         </div>
 
-        <div class="clock-display">
+        <div class="clock-display mt-4">
             <!-- 日期部分 -->
             <div class="date-section">
                 <div class="date-text">{{ dateInfo.date }}</div>
@@ -65,13 +65,6 @@ const time = computed(() => {
     };
 });
 
-// 计算属性：时区
-const timezone = computed(() => {
-    const offset = -now.value.getTimezoneOffset() / 60;
-    const sign = offset >= 0 ? '+' : '';
-    return `UTC${sign}${offset}`;
-});
-
 // 更新时间
 const updateTime = () => {
     now.value = new Date();
@@ -99,13 +92,12 @@ onUnmounted(() => {
     padding: 1.5rem;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
     transition: all 0.3s ease;
+    box-sizing: border-box;
 }
 
 .clock-header {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    margin-bottom: 1.5rem;
     position: absolute;
 }
 
@@ -137,7 +129,7 @@ onUnmounted(() => {
 
 .date-text {
     font-family: 'SF Mono', 'Monaco', 'Inconsolata', monospace;
-    font-size: 1rem;
+    font-size: 1.2rem;
     color: rgba(255, 255, 255, 0.9);
     letter-spacing: 0.05em;
 }
