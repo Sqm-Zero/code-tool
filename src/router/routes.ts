@@ -33,6 +33,24 @@ export const constantRoute = [
         }
     },
     {
+        path: '/tools/hash',
+        component: () => import('@/views/tools/hash.vue'),
+        name: 'tools-hash',
+        meta: { title: '哈希' }
+    },
+    {
+        path: '/tools/base64',
+        component: () => import('@/views/tools/base64.vue'),
+        name: 'tools-base64',
+        meta: { title: 'Base64' }
+    },
+    {
+        path: '/tools/regex',
+        component: () => import('@/views/tools/regex.vue'),
+        name: 'tools-regex',
+        meta: { title: '正则表达式' }
+    },
+    {
         path: '/tools/timestamp',
         component: () => import('@/views/tools/timestampConverter.vue'),
         name: 'tools-timestamp',

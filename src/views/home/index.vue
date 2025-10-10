@@ -20,7 +20,7 @@
               src="https://files.catbox.moe/ej1gq0" alt="kkl-sqm">
             <!-- 状态指示器 -->
             <div class="status-indicator"></div>
-            </div>
+          </div>
 
           <!-- 信息区域 -->
           <div class="info-section">
@@ -28,7 +28,7 @@
             <div class="motto-card mb-4">
               <span class="motto-icon">✨</span>
               <p class="motto-text">莫愁前路无知己，天下谁人不识君</p>
-              </div>
+            </div>
 
             <!-- 用户名 -->
             <div class="name-section">
@@ -36,8 +36,8 @@
               <div class="user-badges">
                 <span class="badge badge-pro">PRO</span>
                 <span class="badge badge-dev">开发者</span>
+              </div>
             </div>
-          </div>
 
             <!-- 社交链接 -->
             <div class="social-links">
@@ -58,10 +58,10 @@
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                     d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                 </svg>
-            </a>
+              </a>
+            </div>
           </div>
         </div>
-          </div>
 
         <!-- 一言展示区 -->
         <div class="quote-section mt-12 max-md:hidden">
@@ -73,9 +73,9 @@
             </p>
             <span class="quote-mark quote-mark-right">"</span>
           </div>
-          </div>
-            </div>
-          </div>
+        </div>
+      </div>
+    </div>
 
     <!-- 右侧工具区 -->
     <div class="tools-section p-4 sm:p-8 md:p-12 lg:p-16 flex-1 min-w-0">
@@ -88,10 +88,10 @@
         <div class="w-full max-w-[560px] mx-auto">
           <Tomato />
         </div>
-        </div>
-      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8 h-[16rem] max-w-6xl mx-auto">
-        <ToolCard v-for="tool in tools" :key="tool.path" :tool="tool" />
-            </div>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8 max-w-6xl mx-auto">
+        <ToolCard class="h-[16rem]" v-for="tool in tools" :key="tool.path" :tool="tool" />
+      </div>
     </div>
   </div>
 </template>
@@ -132,6 +132,27 @@ const tools = [
     title: '时间戳转化',
     description: '支持秒/毫秒互转、多种格式解析、一键复制',
     tags: ['时间戳', '转换', '复制']
+  },
+  {
+    path: '/tools/hash',
+    icon: '🔐',
+    title: '哈希生成',
+    description: '支持 MD5、SHA1、SHA256、SHA512、SM3 等多种哈希算法',
+    tags: ['hash', '加密', 'md5', 'sha', 'sm3']
+  },
+  {
+    path: '/tools/base64',
+    icon: '🔤',
+    title: 'Base64 编解码',
+    description: '支持标准与 URL-safe 的 Base64 编码和解码',
+    tags: ['base64', '编码', '解码']
+  },
+  {
+    path: '/tools/regex',
+    icon: '🔍',
+    title: '正则表达式测试',
+    description: '输入正则表达式与标志位，高亮匹配结果并统计数量',
+    tags: ['regex', '正则', '匹配', '测试']
   }
 ];
 
@@ -168,7 +189,7 @@ const fetchData = () => {
     .catch(err => {
       console.error('Failed to fetch:', err);
       setTimeout(fetchData, 5000); // 错误重试
-  });
+    });
 };
 
 onMounted(() => {
@@ -197,9 +218,17 @@ onUnmounted(() => {
 }
 
 @keyframes gradientMove {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
+  0% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
+
+  100% {
+    background-position: 0% 50%;
+  }
 }
 
 /* 左侧边栏 */
@@ -560,6 +589,7 @@ onUnmounted(() => {
   gap: 2rem;
   justify-items: center;
 }
+
 @media (max-width: 768px) {
   .bubble-1 {
     width: 80px;
