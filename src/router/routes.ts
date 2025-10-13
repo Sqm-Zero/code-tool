@@ -59,6 +59,14 @@ export const constantRoute = [
         }
     },
     {
+        path: '/tools/naming',
+        component: () => import('@/views/tools/naming.vue'),
+        name: 'tools-naming',
+        meta: {
+            title: '命名转换'
+        }
+    },
+    {
         path: '/test',
         component: () => import('@/views/test/index.vue'),
         name: 'test',

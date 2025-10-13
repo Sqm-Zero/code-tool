@@ -58,7 +58,7 @@ const hashResults = reactive([
 ])
 
 // 自动计算（防抖）
-let debounceTimer: number | null = null
+let debounceTimer:any = null
 const autoRun = () => {
   if (debounceTimer) clearTimeout(debounceTimer)
   debounceTimer = setTimeout(() => {
