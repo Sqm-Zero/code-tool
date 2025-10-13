@@ -1,15 +1,11 @@
 <template>
-    <div class="card" @click="$router.push(tool.path)">
-        <div class="card-inner shine-effect">
-            <div class="card-face card-front">
-                <div class="tool-icon" :class="iconClass">{{ tool.icon }}</div>
-                <h3 class="tool-title">{{ tool.title }}</h3>
-            </div>
-            <div class="card-face card-back">
-                <p class="tool-desc">{{ tool.description }}</p>
-                <div class="tool-tags">
-                    <span v-for="(tag, index) in tool.tags" :key="index" class="tag">{{ tag }}</span>
-                </div>
+    <div class="tool-card" @click="$router.push(tool.path)" :style="{ '--gradient': gradient }">
+        <div class="content">
+            <h2 class="card-number">{{ indexStr }}</h2>
+            <h3 class="tool-title">{{ tool.title }}</h3>
+            <p class="tool-desc">{{ tool.description }}</p>
+            <div class="tool-tags">
+                <span v-for="(tag, i) in tool.tags" :key="i" class="tag">{{ tag }}</span>
             </div>
         </div>
     </div>
@@ -20,168 +16,144 @@ import { computed } from 'vue';
 
 interface Tool {
     path: string;
-    icon: string;
     title: string;
     description: string;
     tags: string[];
 }
 
-const props = defineProps<{ tool: Tool }>();
+const props = defineProps<{
+    tool: Tool;
+    index: number;
+}>();
 
-const iconClass = computed(() => {
-    if (props.tool.path.includes('diff')) return 'diff-icon';
-    if (props.tool.path.includes('json')) return 'json-icon';
-    if (props.tool.path.includes('format')) return 'format-icon';
-    return props.tool.path + '-icon';
+const indexStr = computed(() => String(props.index + 1).padStart(2, '0'));
+
+const gradients = [
+    'linear-gradient(315deg, #ff002b, #db3300)',
+    'linear-gradient(315deg, #06f3bb, #bf01fe)',
+    'linear-gradient(315deg, #ffffff, #03bcff)',
+    'linear-gradient(315deg, #ff758c, #ff7eb3)',
+    'linear-gradient(315deg, #667eea, #764ba2)',
+    'linear-gradient(315deg, #f093fb, #f5576c)',
+    'linear-gradient(315deg, #4facfe, #00f2fe)',
+    'linear-gradient(315deg, #a8edea, #fed6e3)'
+];
+
+const gradient = computed(() => {
+    return gradients[props.index % gradients.length];
 });
 </script>
 
 <style scoped>
-.card {
-    perspective: 1500px;
-    cursor: pointer;
-}
-
-.card-inner {
+.tool-card {
     position: relative;
-    width: 100%;
-    height: 100%;
-    transform-style: preserve-3d;
-    transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
-    border-radius: 15px;
-}
-
-.card:hover .card-inner {
-    transform: rotateY(180deg);
-}
-
-.card-face {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    backface-visibility: hidden;
-    border-radius: 15px;
+    height: 320px;
+    aspect-ratio: 3/4;
+    background: #060c21;
     display: flex;
-    flex-direction: column;
     justify-content: center;
     align-items: center;
+    flex-direction: column;
+    border: 2px solid #111;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.tool-card::before {
+    position: absolute;
+    content: "";
+    inset: -2px;
+    transform: skew(2deg, 2deg);
+    z-index: -1;
+    background: var(--gradient);
+}
+
+.tool-card:hover {
+    transform: translateY(-5px);
+}
+
+.content {
+    position: relative;
     padding: 20px;
-    overflow: hidden;
+    transform: translateY(20px);
+    text-align: center;
+    width: 100%;
+    transition: all 0.3s ease;
 }
 
-.card-front {
-    background: linear-gradient(135deg, #ee6ef5, #57b9ff);
-    background-size: 200% 200%;
-    animation: cardGradientShift 10s linear infinite;
-    color: white;
+.card-number {
+    position: absolute;
+    top: -60px;
+    right: 30px;
+    font-size: 8em;
+    color: #ffffff2a;
+    transition: all 0.5s ease;
+    line-height: 1;
+    pointer-events: none;
+    font-weight: 900;
 }
 
-.card-back {
-    background: linear-gradient(135deg, #ff758c 0%, #ff7eb3 100%);
-    color: white;
-    transform: rotateY(180deg);
-}
-
-@keyframes cardGradientShift {
-    0% {
-        background-position: 0% 50%;
-    }
-
-    50% {
-        background-position: 100% 50%;
-    }
-
-    100% {
-        background-position: 0% 50%;
-    }
-}
-
-.card:hover .card-inner::before {
-    left: 100%;
-}
-
-.tool-icon {
-    font-size: 3rem;
-    margin-bottom: 1rem;
-    display: block;
-    /* animation: tumble_move 2s infinite ease-in-out; */
-}
-
-/* @keyframes tumble_move {
-    0%, 100% {
-        transform: translateY(0) rotate(0deg);
-    }
-    50% {
-        transform: translateY(-10px) rotate(20deg);
-    }
-} */
-
-.diff-icon {
-    background: linear-gradient(135deg, #667eea, #764ba2);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-}
-
-.json-icon {
-    background: linear-gradient(135deg, #f093fb, #f5576c);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-}
-
-.format-icon {
-    background: linear-gradient(135deg, #4facfe, #00f2fe);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+.tool-card:hover .card-number {
+    top: -140px;
 }
 
 .tool-title {
-    font-size: 1.5rem;
-    font-weight: 600;
-    color: white;
-    margin: 0;
+    color: #ffffff;
+    font-size: 1.4rem;
+    font-weight: 700;
+    margin: 0 0 15px;
+    line-height: 1.3;
 }
 
 .tool-desc {
-    color: white;
-    line-height: 1.6;
-    font-weight: 500;
-    margin-bottom: 1.5rem;
-    font-size: 0.95rem;
-    text-align: center;
+    color: #ffffff;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    margin: 0 0 20px;
+    max-width: 90%;
+    margin: 0 auto 20px;
 }
 
 .tool-tags {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.5rem;
+    gap: 8px;
     justify-content: center;
+    margin-top: 15px;
 }
 
 .tag {
-    background: rgba(255, 255, 255, 0.2);
-    color: white;
-    padding: 0.25rem 0.75rem;
-    border-radius: 20px;
-    font-size: 0.8rem;
-    font-weight: 500;
-    transition: all 0.2s ease;
-    backdrop-filter: blur(10px);
+    padding: 4px 12px;
+    border: 1px solid #ffffff4d;
+    color: #ffffff;
+    font-size: 0.75rem;
+    border-radius: 4px;
+    transition: all 0.3s ease;
 }
 
-.card:hover .tag {
-    background: rgba(255, 255, 255, 0.3);
-    transform: scale(1.05);
+.tag:hover {
+    background: #ffffff;
+    color: #000000;
+    border-color: #ffffff;
 }
 
-/* 响应式优化 */
-@media (max-width: 640px) {
-    .card {
-        width: 100%;
-        max-width: 320px;
+@media (max-width: 768px) {
+    .tool-card {
+        height: 280px;
+    }
+
+    .card-number {
+        font-size: 6em;
+        top: -40px;
+        right: 20px;
+    }
+
+    .tool-card:hover .card-number {
+        top: -110px;
+    }
+
+    .tool-title {
+        font-size: 1.2rem;
     }
 }
 </style>

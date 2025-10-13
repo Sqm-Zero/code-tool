@@ -89,8 +89,8 @@
           <Tomato />
         </div>
       </div>
-      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8 max-w-6xl mx-auto">
-        <ToolCard class="h-[16rem]" v-for="tool in tools" :key="tool.path" :tool="tool" />
+      <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
+        <ToolCard v-for="(tool, index) in tools" :key="tool.path" :tool="tool" :index="index" />
       </div>
     </div>
   </div>
@@ -107,52 +107,51 @@ import EasyTyper from "easy-typer-js";
 const tools = [
   {
     path: '/tools/diff',
-    icon: '📊',
     title: '代码对比',
     description: '快速对比两段代码的差异，支持字符级和词级对比',
     tags: ['diff', '对比']
   },
   {
     path: '/tools/json',
-    icon: '🔧',
     title: 'JSON 格式化',
     description: '美化和压缩 JSON 数据，支持键名排序',
     tags: ['json', '格式化']
   },
   {
     path: '/tools/format',
-    icon: '⚡',
     title: '代码格式化',
     description: '支持多种语言的代码格式化，让代码更规范',
     tags: ['格式化', '多语言']
   },
   {
     path: '/tools/timestamp',
-    icon: '⏱️',
     title: '时间戳转化',
     description: '支持秒/毫秒互转、多种格式解析、一键复制',
     tags: ['时间戳', '转换', '复制']
   },
   {
     path: '/tools/hash',
-    icon: '🔐',
     title: '哈希生成',
     description: '支持 MD5、SHA1、SHA256、SHA512、SM3 等多种哈希算法',
-    tags: ['hash', '加密', 'md5', 'sha', 'sm3']
+    tags: ['hash', '加密', 'md5']
   },
   {
     path: '/tools/base64',
-    icon: '🔤',
     title: 'Base64 编解码',
     description: '支持标准与 URL-safe 的 Base64 编码和解码',
     tags: ['base64', '编码', '解码']
   },
   {
     path: '/tools/regex',
-    icon: '🔍',
     title: '正则表达式测试',
     description: '输入正则表达式与标志位，高亮匹配结果并统计数量',
-    tags: ['regex', '正则', '匹配', '测试']
+    tags: ['regex', '正则', '匹配']
+  },
+  {
+    path: '/tools/naming',
+    title: '命名规范工具',
+    description: '变量命名转换（驼峰/下划线等）与 Git 分支命名建议',
+    tags: ['命名', '变量', 'git', '规范']
   }
 ];
 
