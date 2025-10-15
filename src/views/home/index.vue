@@ -17,7 +17,7 @@
           <div class="avatar-wrapper relative group">
             <div class="avatar-glow"></div>
             <img class="avatar w-32 h-32 md:w-52 md:h-52 rounded-full relative z-10 border-4 border-white/20"
-              src="https://files.catbox.moe/ej1gq0" alt="kkl-sqm">
+              src="https://avatars.githubusercontent.com/u/127299848?v=4" alt="kkl-sqm">
             <!-- 状态指示器 -->
             <div class="status-indicator"></div>
           </div>

@@ -3,9 +3,11 @@
         <div class="content">
             <h2 class="card-number">{{ indexStr }}</h2>
             <h3 class="tool-title">{{ tool.title }}</h3>
-            <p class="tool-desc">{{ tool.description }}</p>
-            <div class="tool-tags">
-                <span v-for="(tag, i) in tool.tags" :key="i" class="tag">{{ tag }}</span>
+            <div class="hover-content">
+                <p class="tool-desc">{{ tool.description }}</p>
+                <div class="tool-tags">
+                    <span v-for="(tag, i) in tool.tags" :key="i" class="tag">{{ tag }}</span>
+                </div>
             </div>
         </div>
     </div>
@@ -54,7 +56,6 @@ const gradient = computed(() => {
     justify-content: center;
     align-items: center;
     flex-direction: column;
-    border: 2px solid #111;
     cursor: pointer;
     transition: all 0.3s ease;
 }
@@ -65,11 +66,21 @@ const gradient = computed(() => {
     inset: -2px;
     transform: skew(2deg, 2deg);
     z-index: -1;
-    background: var(--gradient);
+    background: transparent;
 }
 
 .tool-card:hover {
     transform: translateY(-5px);
+    background: transparent;
+}
+
+.tool-card:hover::before {
+    background: var(--gradient);
+    transition: background 0.3s ease;
+}
+
+.tool-card:focus {
+    outline: none;
 }
 
 .content {
@@ -83,26 +94,44 @@ const gradient = computed(() => {
 
 .card-number {
     position: absolute;
-    top: -60px;
-    right: 30px;
-    font-size: 8em;
+    top: 20px;
+    right: 20px;
+    font-size: 6em;
     color: #ffffff2a;
-    transition: all 0.5s ease;
+    transition: all 0.3s ease;
     line-height: 1;
     pointer-events: none;
     font-weight: 900;
 }
 
 .tool-card:hover .card-number {
-    top: -140px;
+    font-size: 7em;
+    color: #ffffff4d;
+    transform: scale(1.1);
 }
 
 .tool-title {
     color: #ffffff;
     font-size: 1.4rem;
     font-weight: 700;
-    margin: 0 0 15px;
+    margin: 0;
     line-height: 1.3;
+    transition: all 0.3s ease;
+}
+
+.tool-card:hover .tool-title {
+    margin: 0 0 15px;
+}
+
+.hover-content {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.3s ease;
+}
+
+.tool-card:hover .hover-content {
+    opacity: 1;
+    transform: translateY(0);
 }
 
 .tool-desc {
@@ -143,17 +172,22 @@ const gradient = computed(() => {
     }
 
     .card-number {
-        font-size: 6em;
-        top: -40px;
-        right: 20px;
+        font-size: 4em;
+        top: 15px;
+        right: 15px;
     }
 
     .tool-card:hover .card-number {
-        top: -110px;
+        font-size: 5em;
+        transform: scale(1.1);
     }
 
     .tool-title {
         font-size: 1.2rem;
+    }
+
+    .tool-card:hover .tool-title {
+        margin: 0 0 10px;
     }
 }
 </style>
