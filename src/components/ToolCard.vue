@@ -66,17 +66,17 @@ const gradient = computed(() => {
     inset: -2px;
     transform: skew(2deg, 2deg);
     z-index: -1;
-    background: transparent;
+    background: transparent 0.3s ease;
 }
 
 .tool-card:hover {
-    transform: translateY(-5px);
+    /* transform: translateY(-5px); */
     background: transparent;
 }
 
 .tool-card:hover::before {
     background: var(--gradient);
-    transition: background 0.3s ease;
+    /* transition: background 0.3s ease; */
 }
 
 .tool-card:focus {

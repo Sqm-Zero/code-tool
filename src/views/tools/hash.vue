@@ -1,37 +1,90 @@
 <template>
-  <div class="p-4 max-w-4xl mx-auto">
-    <!-- 控制栏 -->
-    <div
-      class="mb-6 flex flex-wrap items-center justify-between gap-3 bg-white p-4 rounded-lg shadow-sm border border-gray-200">
-      <el-button type="primary" @click="run" :loading="loading">计算所有哈希</el-button>
-      <el-switch v-model="upper" active-text="大写输出" />
-    </div>
-
-    <!-- 输入区域 -->
-    <div class="mb-6">
-      <label class="block text-sm font-medium text-gray-700 mb-2">输入文本</label>
-      <el-input v-model="input" type="textarea" :rows="6" placeholder="请输入要计算哈希的原始文本（支持任意字符）" class="font-mono text-sm"
-        @input="autoRun" />
-      <div class="text-xs text-gray-500 mt-1">
-        提示：输入后将自动计算哈希（若内容较长可手动点击“计算”）
+  <div class="hash-tool">
+    <div class="container">
+      <!-- 页面标题 -->
+      <div class="header">
+        <h1 class="title">哈希计算工具</h1>
+        <p class="subtitle">支持 MD5、SHA-1、SHA-256、SHA-512、SM3 等多种哈希算法</p>
       </div>
-    </div>
 
-    <!-- 结果区域 -->
-    <div class="space-y-4">
-      <div v-for="item in hashResults" :key="item.algo"
-        class="bg-gray-50 rounded-lg border border-gray-200 overflow-hidden transition-shadow hover:shadow-md">
-        <div class="flex justify-between items-center p-3 bg-white border-b border-gray-100">
-          <span class="font-semibold text-gray-800">{{ item.label }}</span>
-          <el-button v-if="item.value" size="small" @click="copy(item.value)" :loading="copying === item.algo"
-            type="primary" link>
-            {{ copying === item.algo ? '已复制' : '复制' }}
-          </el-button>
+      <!-- 控制面板 -->
+      <el-card class="control-panel">
+        <div class="controls">
+          <div class="left-controls">
+            <el-button type="primary" @click="run" :loading="loading" icon="Calculator">
+              计算所有哈希
+            </el-button>
+            <el-button @click="clearAll" icon="Delete" plain>清空</el-button>
+          </div>
+          <div class="right-controls">
+            <el-switch v-model="upper" active-text="大写输出" />
+            <el-switch v-model="autoCalculate" active-text="自动计算" />
+          </div>
         </div>
-        <div class="p-3">
-          <el-input v-model="item.value" type="textarea" :rows="item.algo === 'sha512' ? 3 : 2" readonly
-            :placeholder="loading ? '计算中...' : '无输入内容'" class="font-mono text-sm"
-            :class="{ uppercase: upper && item.value }" />
+      </el-card>
+
+      <!-- 输入区域 -->
+      <el-card class="input-section">
+        <template #header>
+          <div class="card-header">
+            <span>输入文本</span>
+            <div class="input-stats">
+              <span class="char-count">字符数: {{ input.length }}</span>
+              <span class="byte-count">字节数: {{ getByteLength(input) }}</span>
+            </div>
+          </div>
+        </template>
+        <el-input 
+          v-model="input" 
+          type="textarea" 
+          :rows="8" 
+          placeholder="请输入要计算哈希的原始文本（支持任意字符、中文、特殊符号等）" 
+          class="input-textarea font-mono"
+          @input="autoRun"
+          clearable
+        />
+        <div class="input-tips">
+          <el-icon><InfoFilled /></el-icon>
+          <span>支持中文、英文、数字、特殊符号等任意字符，输入后会自动计算哈希值</span>
+        </div>
+      </el-card>
+
+      <!-- 哈希结果区域 -->
+      <div class="results-section">
+        <h2 class="section-title">哈希计算结果</h2>
+        <div class="results-grid">
+          <div v-for="item in hashResults" :key="item.algo" class="hash-card">
+            <div class="hash-header">
+              <div class="hash-info">
+                <span class="hash-name">{{ item.label }}</span>
+                <span class="hash-desc">{{ item.description }}</span>
+              </div>
+              <div class="hash-actions">
+                <el-button 
+                  v-if="item.value" 
+                  size="small" 
+                  @click="copy(item.value)" 
+                  :loading="copying === item.algo"
+                  type="primary" 
+                  link
+                  icon="CopyDocument"
+                >
+                  {{ copying === item.algo ? '已复制' : '复制' }}
+                </el-button>
+              </div>
+            </div>
+            <div class="hash-content">
+              <el-input 
+                v-model="item.value" 
+                type="textarea" 
+                :rows="item.algo === 'sha512' ? 3 : 2" 
+                readonly
+                :placeholder="loading ? '计算中...' : '无输入内容'" 
+                class="hash-output font-mono"
+                :class="{ uppercase: upper && item.value }"
+              />
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -40,51 +93,105 @@
 
 <script setup lang="ts">
 import { ref, reactive, watch } from 'vue'
+import { ElMessage } from 'element-plus'
+import { InfoFilled } from '@element-plus/icons-vue'
 import CryptoJS from 'crypto-js'
 // @ts-ignore
 import { sm3 } from 'sm-crypto'
 
 const input = ref('')
 const upper = ref(false)
+const autoCalculate = ref(true)
 const loading = ref(false)
 const copying = ref<string | null>(null)
 
 const hashResults = reactive([
-  { algo: 'md5', label: 'MD5', value: '' },
-  { algo: 'sha1', label: 'SHA-1', value: '' },
-  { algo: 'sha256', label: 'SHA-256', value: '' },
-  { algo: 'sha512', label: 'SHA-512', value: '' },
-  { algo: 'sm3', label: 'SM3（国密）', value: '' }
+  { 
+    algo: 'md5', 
+    label: 'MD5', 
+    description: '128位哈希，快速但安全性较低',
+    value: '' 
+  },
+  { 
+    algo: 'sha1', 
+    label: 'SHA-1', 
+    description: '160位哈希，已被认为不安全',
+    value: '' 
+  },
+  { 
+    algo: 'sha256', 
+    label: 'SHA-256', 
+    description: '256位哈希，广泛使用的安全算法',
+    value: '' 
+  },
+  { 
+    algo: 'sha512', 
+    label: 'SHA-512', 
+    description: '512位哈希，更高安全性',
+    value: '' 
+  },
+  { 
+    algo: 'sm3', 
+    label: 'SM3（国密）', 
+    description: '中国国家密码算法标准',
+    value: '' 
+  }
 ])
 
 // 自动计算（防抖）
-let debounceTimer:any = null
+let debounceTimer: any = null
 const autoRun = () => {
+  if (!autoCalculate.value) return
+  
   if (debounceTimer) clearTimeout(debounceTimer)
   debounceTimer = setTimeout(() => {
-    if (input.value.trim().length < 100) {
+    if (input.value.trim()) {
       run()
     }
-  }, 500)
+  }, 300)
 }
 
 const run = () => {
-  loading.value = true
-  const text = input.value
-
-  for (const item of hashResults) {
-    let res = ''
-    switch (item.algo) {
-      case 'md5': res = CryptoJS.MD5(text).toString(); break
-      case 'sha1': res = CryptoJS.SHA1(text).toString(); break
-      case 'sha256': res = CryptoJS.SHA256(text).toString(); break
-      case 'sha512': res = CryptoJS.SHA512(text).toString(); break
-      case 'sm3': res = sm3(text); break
-    }
-    item.value = res
+  if (!input.value.trim()) {
+    hashResults.forEach(h => h.value = '')
+    return
   }
 
-  loading.value = false
+  loading.value = true
+  
+  // 使用 setTimeout 来避免阻塞 UI
+  setTimeout(() => {
+    const text = input.value
+
+    for (const item of hashResults) {
+      try {
+        let res = ''
+        switch (item.algo) {
+          case 'md5': 
+            res = CryptoJS.MD5(text).toString()
+            break
+          case 'sha1': 
+            res = CryptoJS.SHA1(text).toString()
+            break
+          case 'sha256': 
+            res = CryptoJS.SHA256(text).toString()
+            break
+          case 'sha512': 
+            res = CryptoJS.SHA512(text).toString()
+            break
+          case 'sm3': 
+            res = sm3(text)
+            break
+        }
+        item.value = upper.value ? res.toUpperCase() : res
+      } catch (error) {
+        console.error(`计算 ${item.label} 失败:`, error)
+        item.value = '计算失败'
+      }
+    }
+
+    loading.value = false
+  }, 10)
 }
 
 const copy = async (text: string) => {
@@ -94,16 +201,44 @@ const copy = async (text: string) => {
   copying.value = algo
   try {
     await navigator.clipboard.writeText(text)
+    ElMessage.success('已复制到剪贴板')
     setTimeout(() => {
       copying.value = null
     }, 1500)
   } catch (e) {
     copying.value = null
+    ElMessage.error('复制失败')
     console.error('复制失败:', e)
   }
 }
 
-// 初始计算（可选）
+const clearAll = () => {
+  input.value = ''
+  hashResults.forEach(h => h.value = '')
+}
+
+const getByteLength = (str: string): number => {
+  return new TextEncoder().encode(str).length
+}
+
+// 监听大小写切换
+watch(upper, (newVal) => {
+  if (newVal) {
+    hashResults.forEach(item => {
+      if (item.value && item.value !== '计算失败') {
+        item.value = item.value.toUpperCase()
+      }
+    })
+  } else {
+    hashResults.forEach(item => {
+      if (item.value && item.value !== '计算失败') {
+        item.value = item.value.toLowerCase()
+      }
+    })
+  }
+})
+
+// 监听输入变化
 watch(input, (val) => {
   if (val === '') {
     hashResults.forEach(h => h.value = '')
@@ -112,7 +247,263 @@ watch(input, (val) => {
 </script>
 
 <style scoped>
+.hash-tool {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  min-height: 100vh;
+  padding: 24px 0;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 32px;
+  color: white;
+}
+
+.title {
+  font-size: 32px;
+  font-weight: 700;
+  margin-bottom: 8px;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.subtitle {
+  font-size: 16px;
+  opacity: 0.9;
+  margin: 0;
+}
+
+.control-panel {
+  margin-bottom: 24px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.left-controls, .right-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.input-section {
+  margin-bottom: 24px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: 600;
+}
+
+.input-stats {
+  display: flex;
+  gap: 16px;
+  font-size: 14px;
+  color: #666;
+}
+
+.char-count, .byte-count {
+  background: #f0f2f5;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+}
+
+.input-textarea {
+  font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+  line-height: 1.5;
+}
+
+.input-tips {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+  padding: 12px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  font-size: 14px;
+  color: #666;
+}
+
+.results-section {
+  margin-bottom: 24px;
+}
+
+.section-title {
+  font-size: 20px;
+  font-weight: 600;
+  color: white;
+  margin-bottom: 20px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.results-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 20px;
+}
+
+.hash-card {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.hash-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+}
+
+.hash-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  background: #f8f9fa;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.hash-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.hash-name {
+  font-weight: 600;
+  font-size: 16px;
+  color: #333;
+}
+
+.hash-desc {
+  font-size: 12px;
+  color: #666;
+}
+
+.hash-content {
+  padding: 16px 20px;
+}
+
+.hash-output {
+  font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
 .uppercase {
   text-transform: uppercase;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .container {
+    padding: 0 16px;
+  }
+  
+  .title {
+    font-size: 24px;
+  }
+  
+  .controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .left-controls, .right-controls {
+    justify-content: center;
+  }
+  
+  .results-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .card-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  
+  .input-stats {
+    align-self: stretch;
+    justify-content: space-between;
+  }
+}
+
+/* 加载动画 */
+:deep(.el-loading-mask) {
+  border-radius: 12px;
+}
+
+/* 按钮样式优化 */
+:deep(.el-button) {
+  border-radius: 8px;
+  font-weight: 500;
+}
+
+:deep(.el-button--primary) {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
+}
+
+:deep(.el-button--primary:hover) {
+  background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+}
+
+/* 输入框样式优化 */
+:deep(.el-textarea__inner) {
+  border-radius: 8px;
+  border: 2px solid #e1e5e9;
+  transition: border-color 0.2s ease;
+}
+
+:deep(.el-textarea__inner:focus) {
+  border-color: #667eea;
+  box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.1);
+}
+
+/* 卡片样式优化 */
+:deep(.el-card) {
+  border: none;
+  border-radius: 12px;
+}
+
+:deep(.el-card__header) {
+  background: #f8f9fa;
+  border-bottom: 1px solid #e9ecef;
+  padding: 16px 20px;
+}
+
+:deep(.el-card__body) {
+  padding: 20px;
+}
+
+/* 开关样式优化 */
+:deep(.el-switch__label) {
+  font-weight: 500;
+  color: #666;
+}
+
+:deep(.el-switch.is-checked .el-switch__core) {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-color: #667eea;
 }
 </style>
