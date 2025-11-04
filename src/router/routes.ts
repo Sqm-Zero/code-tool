@@ -67,6 +67,14 @@ export const constantRoute = [
         }
     },
     {
+        path: '/tools/todo',
+        component: () => import('@/views/tools/todo.vue'),
+        name: 'tools-todo',
+        meta: {
+            title: '每日 TODO'
+        }
+    },
+    {
         path: '/test',
         component: () => import('@/views/test/index.vue'),
         name: 'test',

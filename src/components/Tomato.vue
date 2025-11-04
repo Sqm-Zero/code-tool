@@ -73,6 +73,7 @@ const currentMode = ref<PomodoroMode>('work')
 const currentCycle = ref(0) // 完成的工作番茄数
 const timeLeft = ref(focusMinutes.value * 60) // 剩余时间（秒）
 const initialTime = ref(focusMinutes.value * 60); // 记录当前模式的初始总时间
+const isSwitching = ref(false); // 防抖：避免在 0 秒时重复触发切换
 
 const showSettings = ref(false)
 const activeTab = ref<PomodoroMode>('work')
@@ -80,6 +81,7 @@ const activeTab = ref<PomodoroMode>('work')
 const setMode = (mode: PomodoroMode) => {
     pause(); // 切换模式时暂停计时器
     currentMode.value = mode;
+    activeTab.value = mode; // 同步标签页以反映当前模式
     setTimeByMode(mode); // 根据新模式设置时间
 };
 
@@ -116,29 +118,39 @@ const sendNotification = (title: string, body: string) => {
 // --- 计时器逻辑 ---
 const tick = () => {
     if (timeLeft.value > 0) {
-        timeLeft.value--;
-    } else {
-        // 时间结束
-        stop(); // 停止当前计时器
-        playDing(); // 播放结束音效
-
-        let notificationTitle = '';
-        let notificationBody = '';
-
-        if (currentMode.value === 'work') {
-            currentCycle.value++;
-            notificationTitle = '工作时间结束！';
-            notificationBody = shouldLongBreak.value ? '该长休息了！' : '该短休息了！';
-            const nextMode = shouldLongBreak.value ? 'longBreak' : 'shortBreak';
-            setMode(nextMode); // 自动切换到下一个休息模式
-        } else {
-            notificationTitle = '休息时间结束！';
-            notificationBody = '该继续工作了！';
-            setMode('work'); // 休息结束，回到工作模式
-        }
-        sendNotification(notificationTitle, notificationBody);
-        start(); // 自动开始下一个模式
+        timeLeft.value = Math.max(0, timeLeft.value - 1);
+        return;
     }
+
+    if (isSwitching.value) return;
+    isSwitching.value = true;
+
+    // 时间结束
+    pause(); // 停止当前计时器
+    playDing(); // 播放结束音效
+
+    let notificationTitle = '';
+    let notificationBody = '';
+
+    if (currentMode.value === 'work') {
+        currentCycle.value++;
+        notificationTitle = '工作时间结束！';
+        notificationBody = shouldLongBreak.value ? '该长休息了！' : '该短休息了！';
+        const nextMode = shouldLongBreak.value ? 'longBreak' : 'shortBreak';
+        setMode(nextMode); // 自动切换到下一个休息模式
+    } else {
+        notificationTitle = '休息时间结束！';
+        notificationBody = '该继续工作了！';
+        setMode('work'); // 休息结束，回到工作模式
+    }
+    sendNotification(notificationTitle, notificationBody);
+
+    // 下一轮开始前，释放切换锁
+    start(); // 自动开始下一个模式
+    // 使用微任务确保下一次 tick 前复位
+    Promise.resolve().then(() => {
+        isSwitching.value = false;
+    });
 };
 
 const { start: startTimer, stop: stopTimer, isRunning } = useInterval(tick, 1000);
@@ -161,11 +173,7 @@ const toggleTimer = () => {
     }
 };
 
-const reset = () => {
-    pause();
-    currentCycle.value = 0;
-    setMode('work'); // 重置为工作模式，并更新时间
-};
+// 保留如需对外暴露重置功能，可按需恢复
 
 const applySettings = () => {
     // 应用设置并关闭弹窗
@@ -184,22 +192,7 @@ const shouldLongBreak = computed(() => {
     return currentCycle.value > 0 && currentCycle.value % longBreakInterval.value === 0;
 });
 
-// 进度条样式
-const progressBarStyle = computed(() => {
-    const progress = (timeLeft.value / initialTime.value) * 100;
-    let bgColor = 'bg-red-500'; // 默认工作模式
-    if (currentMode.value === 'shortBreak') {
-        bgColor = 'bg-green-500';
-    } else if (currentMode.value === 'longBreak') {
-        bgColor = 'bg-blue-500';
-    }
-
-    return {
-        width: `${progress}%`,
-        backgroundColor: currentMode.value === 'work' ? '#ef4444' : (currentMode.value === 'shortBreak' ? '#22c55e' : '#3b82f6'),
-        // Tailwind 颜色直接用 hex 值
-    };
-});
+// (可选) 如需进度条样式，可在模板实际使用后再启用对应计算属性
 
 // --- 生命周期和监听 ---
 onMounted(() => {

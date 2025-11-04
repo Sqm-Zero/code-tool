@@ -7,143 +7,143 @@
                 <p class="subtitle">测试正则表达式，高亮显示匹配结果，支持多种标志位</p>
             </div>
 
-            <!-- 控制面板 -->
-            <el-card class="control-panel">
-                <template #header>
-                    <div class="card-header">
-                        <span>正则表达式</span>
-                        <div class="pattern-stats">
-                            <span class="pattern-length">{{ pattern.length }} 字符</span>
-                            <span class="flags-count">{{ activeFlagsCount }} 标志</span>
+            <!-- 主内容区域：左右分栏布局 -->
+            <div class="main-content">
+                <!-- 左侧：输入区域 -->
+                <div class="left-panel">
+                    <!-- 正则表达式控制面板 -->
+                    <el-card class="control-panel">
+                        <template #header>
+                            <div class="card-header">
+                                <span>正则表达式</span>
+                                <div class="pattern-stats">
+                                    <span class="pattern-length">{{ pattern.length }} 字符</span>
+                                    <span class="flags-count">{{ activeFlagsCount }} 标志</span>
+                                </div>
+                            </div>
+                        </template>
+                        
+                        <div class="pattern-input">
+                            <el-input 
+                                v-model="pattern" 
+                                placeholder="输入正则表达式，例如：(foo|bar)+ 或 \d{3,5}" 
+                                class="pattern-field"
+                                @keyup.enter="run"
+                                clearable
+                            />
+                            <div class="pattern-examples">
+                                <span class="examples-label">常用示例：</span>
+                                <div class="example-buttons">
+                                    <el-button 
+                                        v-for="example in patternExamples" 
+                                        :key="example.name"
+                                        size="small" 
+                                        @click="useExample(example)"
+                                        plain
+                                    >
+                                        {{ example.name }}
+                                    </el-button>
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                </template>
-                
-                <div class="pattern-input">
-                    <el-input 
-                        v-model="pattern" 
-                        placeholder="输入正则表达式，例如：(foo|bar)+ 或 \d{3,5}" 
-                        class="pattern-field"
-                        @keyup.enter="run"
-                        clearable
-                    />
-                    <div class="pattern-examples">
-                        <span class="examples-label">常用示例：</span>
-                        <div class="example-buttons">
-                            <el-button 
-                                v-for="example in patternExamples" 
-                                :key="example.name"
-                                size="small" 
-                                @click="useExample(example)"
-                                plain
-                            >
-                                {{ example.name }}
+
+                        <div class="flags-section">
+                            <div class="flags-label">
+                                <span>匹配标志：</span>
+                            </div>
+                            <div class="flags-group">
+                                <el-checkbox v-model="flags.i" border size="small">
+                                    <span class="flag-item">
+                                        <code>i</code> 忽略大小写
+                                    </span>
+                                </el-checkbox>
+                                <el-checkbox v-model="flags.m" border size="small">
+                                    <span class="flag-item">
+                                        <code>m</code> 多行模式
+                                    </span>
+                                </el-checkbox>
+                                <el-checkbox v-model="flags.s" border size="small">
+                                    <span class="flag-item">
+                                        <code>s</code> 单行模式
+                                    </span>
+                                </el-checkbox>
+                                <el-checkbox v-model="flags.g" border size="small">
+                                    <span class="flag-item">
+                                        <code>g</code> 全局匹配
+                                    </span>
+                                </el-checkbox>
+                            </div>
+                        </div>
+
+                        <div class="action-buttons">
+                            <el-button type="primary" @click="run" :loading="loading" icon="Search">
+                                测试正则
+                            </el-button>
+                            <el-button @click="clearAll" icon="Delete" plain>
+                                清空
                             </el-button>
                         </div>
-                    </div>
-                    <div class="pattern-tips">
-                        <el-icon><InfoFilled /></el-icon>
-                        <span>支持所有JavaScript正则表达式语法，按回车键快速测试</span>
-                    </div>
+
+                        <transition name="fade">
+                            <div v-if="error" class="error-message">
+                                <el-icon><Warning /></el-icon>
+                                <span>正则表达式错误：{{ error }}</span>
+                            </div>
+                        </transition>
+                    </el-card>
+
+                    <!-- 测试文本区域 -->
+                    <el-card class="input-section">
+                        <template #header>
+                            <div class="card-header">
+                                <span>测试文本</span>
+                                <div class="text-stats">
+                                    <span class="text-length">{{ source.length }} 字符</span>
+                                    <span class="line-count">{{ source.split('\n').length }} 行</span>
+                                </div>
+                            </div>
+                        </template>
+                        <el-input 
+                            v-model="source" 
+                            type="textarea" 
+                            :rows="15"
+                            placeholder="在此输入要测试的文本内容..."
+                            class="test-textarea font-mono"
+                        />
+                    </el-card>
                 </div>
 
-                <div class="flags-section">
-                    <div class="flags-label">
-                        <span>匹配标志：</span>
-                    </div>
-                    <div class="flags-group">
-                        <el-checkbox v-model="flags.i" border size="small">
-                            <span class="flag-item">
-                                <code>i</code> 忽略大小写
-                            </span>
-                        </el-checkbox>
-                        <el-checkbox v-model="flags.m" border size="small">
-                            <span class="flag-item">
-                                <code>m</code> 多行模式
-                            </span>
-                        </el-checkbox>
-                        <el-checkbox v-model="flags.s" border size="small">
-                            <span class="flag-item">
-                                <code>s</code> 单行模式
-                            </span>
-                        </el-checkbox>
-                        <el-checkbox v-model="flags.g" border size="small">
-                            <span class="flag-item">
-                                <code>g</code> 全局匹配
-                            </span>
-                        </el-checkbox>
-                    </div>
-                </div>
-
-                <div class="action-buttons">
-                    <el-button type="primary" @click="run" :loading="loading" icon="Search">
-                        测试正则
-                    </el-button>
-                    <el-button @click="clearAll" icon="Delete" plain>
-                        清空
-                    </el-button>
-                </div>
-
-                <transition name="fade">
-                    <div v-if="error" class="error-message">
-                        <el-icon><Warning /></el-icon>
-                        <span>正则表达式错误：{{ error }}</span>
-                    </div>
-                </transition>
-            </el-card>
-
-            <!-- 测试文本区域 -->
-            <el-card class="input-section">
-                <template #header>
-                    <div class="card-header">
-                        <span>测试文本</span>
-                        <div class="text-stats">
-                            <span class="text-length">{{ source.length }} 字符</span>
-                            <span class="line-count">{{ source.split('\n').length }} 行</span>
+                <!-- 右侧：结果区域 -->
+                <div class="right-panel">
+                    <el-card class="results-section">
+                        <template #header>
+                            <div class="card-header">
+                                <span>匹配结果</span>
+                                <div class="match-stats">
+                                    <span class="match-count">{{ matches }} 处匹配</span>
+                                    <span class="match-time">{{ matchTime }}ms</span>
+                                </div>
+                            </div>
+                        </template>
+                        
+                        <div class="results-content">
+                            <div v-if="!pattern && !source" class="empty-state">
+                                <el-icon><Document /></el-icon>
+                                <p>请输入正则表达式和测试文本来查看匹配结果</p>
+                            </div>
+                            <div v-else-if="!pattern" class="empty-state">
+                                <el-icon><Edit /></el-icon>
+                                <p>请输入正则表达式</p>
+                            </div>
+                            <div v-else-if="!source" class="empty-state">
+                                <el-icon><Document /></el-icon>
+                                <p>请输入测试文本</p>
+                            </div>
+                            <div v-else class="highlighted-text" v-html="highlighted"></div>
                         </div>
-                    </div>
-                </template>
-                <el-input 
-                    v-model="source" 
-                    type="textarea" 
-                    :rows="12" 
-                    placeholder="在此输入要测试的文本内容..."
-                    class="test-textarea font-mono"
-                />
-                <div class="input-tips">
-                    <el-icon><InfoFilled /></el-icon>
-                    <span>输入文本后会自动测试正则表达式，匹配的内容会高亮显示</span>
+                    </el-card>
                 </div>
-            </el-card>
-
-            <!-- 匹配结果区域 -->
-            <el-card class="results-section">
-                <template #header>
-                    <div class="card-header">
-                        <span>匹配结果</span>
-                        <div class="match-stats">
-                            <span class="match-count">{{ matches }} 处匹配</span>
-                            <span class="match-time">{{ matchTime }}ms</span>
-                        </div>
-                    </div>
-                </template>
-                
-                <div class="results-content">
-                    <div v-if="!pattern && !source" class="empty-state">
-                        <el-icon><Document /></el-icon>
-                        <p>请输入正则表达式和测试文本来查看匹配结果</p>
-                    </div>
-                    <div v-else-if="!pattern" class="empty-state">
-                        <el-icon><Edit /></el-icon>
-                        <p>请输入正则表达式</p>
-                    </div>
-                    <div v-else-if="!source" class="empty-state">
-                        <el-icon><Document /></el-icon>
-                        <p>请输入测试文本</p>
-                    </div>
-                    <div v-else class="highlighted-text" v-html="highlighted"></div>
-                </div>
-            </el-card>
+            </div>
         </div>
     </div>
 </template>
@@ -151,7 +151,7 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
 import { ElMessage } from 'element-plus'
-import { InfoFilled, Warning, Search, Delete, Document, Edit } from '@element-plus/icons-vue'
+import { Warning, Document, Edit } from '@element-plus/icons-vue'
 
 const pattern = ref('')
 const flags = ref({ i: true, m: false, s: false, g: true })
@@ -313,38 +313,80 @@ watch([pattern, source, flags], () => {
 .regex-tool {
     background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
     min-height: 100vh;
-    padding: 24px 0;
+    padding: 20px 0;
+    display: flex;
+    flex-direction: column;
 }
 
 .container {
-    max-width: 1200px;
+    max-width: 1600px;
     margin: 0 auto;
     padding: 0 20px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
 }
 
 .header {
     text-align: center;
-    margin-bottom: 32px;
+    margin-bottom: 20px;
     color: white;
+    flex-shrink: 0;
+}
+
+.main-content {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    flex: 1;
+    min-height: 0;
+    align-items: stretch;
+}
+
+.left-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    min-height: 0;
+}
+
+.right-panel {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
 }
 
 .title {
-    font-size: 32px;
+    font-size: 28px;
     font-weight: 700;
-    margin-bottom: 8px;
+    margin-bottom: 6px;
     text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .subtitle {
-    font-size: 16px;
+    font-size: 14px;
     opacity: 0.9;
     margin: 0;
 }
 
 .control-panel, .input-section, .results-section {
-    margin-bottom: 24px;
     border-radius: 12px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+}
+
+.input-section {
+    flex: 1;
+    min-height: 0;
+}
+
+.results-section {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
 }
 
 .card-header {
@@ -369,7 +411,18 @@ watch([pattern, source, flags], () => {
 }
 
 .pattern-input {
-    margin-bottom: 20px;
+    margin-bottom: 16px;
+}
+
+.pattern-examples {
+    margin: 10px 0 0 0;
+    padding: 10px;
+    background: #f8f9fa;
+    border-radius: 8px;
+}
+
+.pattern-tips, .input-tips {
+    display: none;
 }
 
 .pattern-field {
@@ -410,7 +463,7 @@ watch([pattern, source, flags], () => {
 }
 
 .flags-section {
-    margin-bottom: 20px;
+    margin-bottom: 16px;
 }
 
 .flags-label {
@@ -462,10 +515,29 @@ watch([pattern, source, flags], () => {
 .test-textarea {
     font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
     line-height: 1.5;
+    flex: 1;
+    min-height: 0;
+}
+
+:deep(.test-textarea .el-textarea__inner) {
+    height: 100%;
+    resize: none;
 }
 
 .results-content {
-    min-height: 200px;
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+}
+
+:deep(.results-section .el-card__body) {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    padding: 16px;
 }
 
 .empty-state {
@@ -473,9 +545,10 @@ watch([pattern, source, flags], () => {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    height: 200px;
+    flex: 1;
     color: #666;
     text-align: center;
+    min-height: 200px;
 }
 
 .empty-state .el-icon {
@@ -499,6 +572,9 @@ watch([pattern, source, flags], () => {
     background: #f8f9fa;
     border-radius: 8px;
     border: 1px solid #e9ecef;
+    flex: 1;
+    overflow-y: auto;
+    min-height: 0;
 }
 
 .regex-match {
@@ -540,13 +616,45 @@ watch([pattern, source, flags], () => {
 }
 
 /* 响应式设计 */
+@media (max-width: 1200px) {
+    .main-content {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto 1fr;
+    }
+    
+    .left-panel {
+        max-height: 50vh;
+        overflow-y: auto;
+    }
+    
+    .right-panel {
+        min-height: 400px;
+    }
+}
+
 @media (max-width: 768px) {
     .container {
         padding: 0 16px;
     }
     
+    .regex-tool {
+        padding: 16px 0;
+    }
+    
+    .header {
+        margin-bottom: 16px;
+    }
+    
     .title {
         font-size: 24px;
+    }
+    
+    .subtitle {
+        font-size: 12px;
+    }
+    
+    .main-content {
+        gap: 16px;
     }
     
     .flags-group {
@@ -568,6 +676,14 @@ watch([pattern, source, flags], () => {
         align-self: stretch;
         justify-content: space-between;
     }
+    
+    .pattern-examples {
+        padding: 8px;
+    }
+    
+    .example-buttons {
+        gap: 6px;
+    }
 }
 
 /* 卡片样式优化 */
@@ -583,7 +699,14 @@ watch([pattern, source, flags], () => {
 }
 
 :deep(.el-card__body) {
-    padding: 20px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+}
+
+:deep(.control-panel .el-card__body) {
+    padding: 16px;
 }
 
 /* 按钮样式优化 */

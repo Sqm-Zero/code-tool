@@ -1,5 +1,8 @@
 <template>
   <div>
+    <!-- 全屏加载动画 -->
+    <LoadingScreen :isLoading="isLoading" />
+    
     <!-- <header class="nav">
       <div class="brand" @click="$router.push('/')">Tools</div>
       <nav class="links">
@@ -16,6 +19,33 @@
 </template>
 
 <script setup lang="ts">
+import { ref, onMounted } from 'vue';
+import LoadingScreen from '@/components/LoadingScreen.vue';
+
+const isLoading = ref(true);
+
+onMounted(() => {
+  // 等待所有资源加载完成
+  if (document.readyState === 'complete') {
+    handleLoadComplete();
+  } else {
+    window.addEventListener('load', handleLoadComplete);
+  }
+  
+  // 最少显示1.5秒，确保动画效果完整展示
+  setTimeout(() => {
+    if (isLoading.value) {
+      handleLoadComplete();
+    }
+  }, 1500);
+});
+
+const handleLoadComplete = () => {
+  // 延迟隐藏，让过渡动画更流畅
+  setTimeout(() => {
+    isLoading.value = false;
+  }, 500);
+};
 </script>
 
 <style scoped>

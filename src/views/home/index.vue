@@ -14,12 +14,15 @@
         <div
           class="profile-container flex flex-col max-lg:flex-row max-lg:items-start gap-6 max-md:items-center max-md:justify-center">
           <!-- 头像区域 -->
-          <div class="avatar-wrapper relative group">
+          <div class="avatar-wrapper relative group" @click="showTodoDrawer = true" style="cursor: pointer;">
             <div class="avatar-glow"></div>
             <img class="avatar w-32 h-32 md:w-52 md:h-52 rounded-full relative z-10 border-4 border-white/20"
               src="https://avatars.githubusercontent.com/u/127299848?v=4" alt="kkl-sqm">
-            <!-- 状态指示器 -->
-            <div class="status-indicator"></div>
+            <!-- 状态指示器 / TODO 提示徽章 -->
+            <div v-if="todoPendingCount > 0" class="todo-badge-indicator">
+              {{ todoPendingCount > 99 ? '99+' : todoPendingCount }}
+            </div>
+            <div v-else class="status-indicator"></div>
           </div>
 
           <!-- 信息区域 -->
@@ -93,6 +96,17 @@
         <ToolCard v-for="(tool, index) in tools" :key="tool.path" :tool="tool" :index="index" />
       </div>
     </div>
+
+    <!-- TODO 抽屉 -->
+    <el-drawer
+      v-model="showTodoDrawer"
+      title="每日 TODO"
+      :size="isMobile ? '90%' : '600px'"
+      direction="rtl"
+      :with-header="true"
+    >
+      <TodoDrawerContent @update:count="handleTodoCountUpdate" />
+    </el-drawer>
   </div>
 </template>
 
@@ -100,7 +114,8 @@
 import ToolCard from '@/components/ToolCard.vue';
 import Tomato from '@/components/Tomato.vue';
 import ElectronicClock from '@/components/ElectronicClock.vue';
-import { onMounted, reactive, onUnmounted } from 'vue';
+import TodoDrawerContent from '@/components/TodoDrawerContent.vue';
+import { onMounted, reactive, onUnmounted, ref, computed } from 'vue';
 import EasyTyper from "easy-typer-js";
 
 // 工具列表数据
@@ -169,6 +184,31 @@ const obj = reactive({
 let myYiYan = "https://v1.hitokoto.cn/?c=a&encode=json"
 let typerInstance: any = null;
 
+// TODO 抽屉相关
+const showTodoDrawer = ref(false);
+const todoPendingCount = ref(0);
+const isMobile = computed(() => {
+  if (typeof window === 'undefined') return false;
+  return window.innerWidth < 768;
+});
+
+const handleTodoCountUpdate = (count: number) => {
+  todoPendingCount.value = count;
+};
+
+// 加载初始待办数量
+const loadTodoCount = () => {
+  try {
+    const saved = localStorage.getItem('daily-todos');
+    if (saved) {
+      const todos = JSON.parse(saved);
+      todoPendingCount.value = todos.filter((t: any) => !t.completed).length;
+    }
+  } catch (error) {
+    console.error('加载待办数量失败:', error);
+  }
+};
+
 const fetchData = () => {
   fetch(myYiYan)
     .then((res) => res.json())
@@ -193,6 +233,7 @@ const fetchData = () => {
 
 onMounted(() => {
   fetchData();
+  loadTodoCount();
 });
 
 onUnmounted(() => {
@@ -331,17 +372,48 @@ onUnmounted(() => {
   box-shadow: 0 15px 50px rgba(0, 0, 0, 0.3);
 }
 
-/* 在线状态指示器 */
-.status-indicator {
+/* 在线状态指示器 / TODO 徽章指示器 */
+.status-indicator,
+.todo-badge-indicator {
   position: absolute;
   bottom: 8px;
   right: 88px;
+}
+
+.status-indicator {
   width: 24px;
   height: 24px;
   background: #10b981;
   border: 3px solid white;
   border-radius: 50%;
   animation: pulse 2s infinite;
+}
+
+.todo-badge-indicator {
+  min-width: 24px;
+  height: 24px;
+  padding: 0 6px;
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  color: white;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+  border: 3px solid white;
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.4);
+  z-index: 20;
+  animation: badgePulse 2s infinite;
+}
+
+@keyframes badgePulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
 }
 
 @keyframes pulse {

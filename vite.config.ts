@@ -3,16 +3,20 @@ import vue from '@vitejs/plugin-vue'
 import path from 'path'
 
 import { createSvgIconsPlugin } from 'vite-plugin-svg-icons'
+import { musicScanner } from './vite-plugin-music-scanner'
 // https://vitejs.dev/config/
 export default defineConfig(({command,mode}) =>{
   const env = loadEnv(mode, process.cwd());
   return {
     base: './',
-    plugins: [vue(),
-    createSvgIconsPlugin({
-      iconDirs: [path.resolve(process.cwd(), 'src/assets/icons')],
-      symbolId: 'icon-[dir]-[name]'
-    })],
+    plugins: [
+      vue(),
+      createSvgIconsPlugin({
+        iconDirs: [path.resolve(process.cwd(), 'src/assets/icons')],
+        symbolId: 'icon-[dir]-[name]'
+      }),
+      musicScanner()
+    ],
     resolve: {
       alias: {
         "@": path.resolve("./src") // 相对路径别名配置，使用 @ 代替 src
