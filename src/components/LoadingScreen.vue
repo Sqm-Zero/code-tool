@@ -3,17 +3,26 @@
     class="loading-screen"
     :class="{ 
       'loading-fullscreen': props.isLoading || isAnimating,
-      'loading-minimized': !props.isLoading && !isAnimating
+      'loading-minimized': !props.isLoading && !isAnimating && !isCollapsed,
+      'loading-collapsed': !props.isLoading && !isAnimating && isCollapsed
     }"
-    @mouseenter="showControls = true"
+    @mouseenter="!isCollapsed && (showControls = true)"
     @mouseleave="showControls = false"
   >
-    <div class="loading-content">
+    <div 
+      class="loading-content"
+      @click="!props.isLoading && !isAnimating && toggleCollapse()"
+      :title="isCollapsed ? '点击展开' : '点击收缩'"
+    >
       <img src="/loading.gif" alt="加载中..." class="loading-gif" />
+      <!-- 收缩时的展开提示 -->
+      <div v-if="isCollapsed" class="expand-hint">
+        <el-icon class="expand-icon"><ArrowRight /></el-icon>
+      </div>
     </div>
     <!-- 音乐控制面板（仅在最小化状态且hover时显示，放在小人右侧） -->
     <div 
-      v-if="!props.isLoading && !isAnimating" 
+      v-if="!props.isLoading && !isAnimating && !isCollapsed" 
       class="music-panel"
       :class="{ 'show': showControls }"
       @click.stop
@@ -97,7 +106,7 @@
 
 <script setup lang="ts">
 import { ref, watch, onMounted, onUnmounted, computed } from 'vue';
-import { VideoPlay, VideoPause, Headset, ArrowUp, Mute, Microphone } from '@element-plus/icons-vue';
+import { VideoPlay, VideoPause, Headset, ArrowUp, ArrowRight, Mute, Microphone } from '@element-plus/icons-vue';
 
 interface MusicItem {
   name: string;
@@ -112,6 +121,7 @@ const props = withDefaults(defineProps<{
 });
 
 const isAnimating = ref(false);
+const isCollapsed = ref(false); // 收缩状态
 const audioRef = ref<HTMLAudioElement | null>(null);
 const isPlaying = ref(false);
 const audioLoaded = ref(false);
@@ -234,6 +244,15 @@ const toggleMusic = async () => {
   }
 };
 
+// 切换收缩状态
+const toggleCollapse = () => {
+  isCollapsed.value = !isCollapsed.value;
+  // 收缩时隐藏控制面板
+  if (isCollapsed.value) {
+    showControls.value = false;
+  }
+};
+
 onMounted(async () => {
   // 加载音乐列表
   await loadMusicList();
@@ -277,10 +296,24 @@ onUnmounted(() => {
 /* 缩小到左下角状态 */
 .loading-minimized {
   top: auto;
+  left: 20px;
   bottom: 20px;
   width: 15rem;
   transform: scale(1);
   transition: all 0.8s cubic-bezier(0.2, 0, 0.1, 1);
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+/* 收缩状态 */
+.loading-collapsed {
+  top: auto;
+  left: 20px;
+  bottom: 20px;
+  width: 3rem;
+  height: 3rem;
+  transform: scale(1);
+  transition: all 0.3s cubic-bezier(0.2, 0, 0.1, 1);
   cursor: pointer;
   pointer-events: auto;
 }
@@ -292,6 +325,8 @@ onUnmounted(() => {
   justify-content: center;
   max-width: 100vw;
   max-height: 100vh;
+  width: 100%;
+  height: 100%;
 }
 
 .loading-gif {
@@ -311,6 +346,35 @@ onUnmounted(() => {
   width: 100%;
   height: 100%;
   border-radius: 8px;
+}
+
+.loading-collapsed .loading-gif {
+  width: 100%;
+  height: 100%;
+  border-radius: 8px;
+  opacity: 0.3;
+}
+
+.expand-hint {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 50%;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  z-index: 10;
+  pointer-events: none;
+}
+
+.expand-icon {
+  font-size: 1.2rem;
+  color: #3b82f6;
 }
 
 /* 音乐控制面板 - 放在小人右侧 */

@@ -7,84 +7,95 @@
         <p class="subtitle">支持 MD5、SHA-1、SHA-256、SHA-512、SM3 等多种哈希算法</p>
       </div>
 
-      <!-- 控制面板 -->
-      <el-card class="control-panel">
-        <div class="controls">
-          <div class="left-controls">
-            <el-button type="primary" @click="run" :loading="loading" icon="Calculator">
-              计算所有哈希
-            </el-button>
-            <el-button @click="clearAll" icon="Delete" plain>清空</el-button>
-          </div>
-          <div class="right-controls">
-            <el-switch v-model="upper" active-text="大写输出" />
-            <el-switch v-model="autoCalculate" active-text="自动计算" />
-          </div>
-        </div>
-      </el-card>
-
-      <!-- 输入区域 -->
-      <el-card class="input-section">
-        <template #header>
-          <div class="card-header">
-            <span>输入文本</span>
-            <div class="input-stats">
-              <span class="char-count">字符数: {{ input.length }}</span>
-              <span class="byte-count">字节数: {{ getByteLength(input) }}</span>
-            </div>
-          </div>
-        </template>
-        <el-input 
-          v-model="input" 
-          type="textarea" 
-          :rows="8" 
-          placeholder="请输入要计算哈希的原始文本（支持任意字符、中文、特殊符号等）" 
-          class="input-textarea font-mono"
-          @input="autoRun"
-          clearable
-        />
-        <div class="input-tips">
-          <el-icon><InfoFilled /></el-icon>
-          <span>支持中文、英文、数字、特殊符号等任意字符，输入后会自动计算哈希值</span>
-        </div>
-      </el-card>
-
-      <!-- 哈希结果区域 -->
-      <div class="results-section">
-        <h2 class="section-title">哈希计算结果</h2>
-        <div class="results-grid">
-          <div v-for="item in hashResults" :key="item.algo" class="hash-card">
-            <div class="hash-header">
-              <div class="hash-info">
-                <span class="hash-name">{{ item.label }}</span>
-                <span class="hash-desc">{{ item.description }}</span>
-              </div>
-              <div class="hash-actions">
-                <el-button 
-                  v-if="item.value" 
-                  size="small" 
-                  @click="copy(item.value)" 
-                  :loading="copying === item.algo"
-                  type="primary" 
-                  link
-                  icon="CopyDocument"
-                >
-                  {{ copying === item.algo ? '已复制' : '复制' }}
+      <!-- 主内容区域：左右分栏 -->
+      <div class="main-content">
+        <!-- 左侧：控制面板和输入区域 -->
+        <div class="left-panel">
+          <!-- 控制面板 -->
+          <el-card class="control-panel">
+            <div class="controls">
+              <div class="left-controls">
+                <el-button type="primary" @click="run" :loading="loading">
+                  计算所有哈希
                 </el-button>
+                <el-button @click="clearAll" plain>清空</el-button>
+              </div>
+              <div class="right-controls">
+                <el-switch v-model="upper" active-text="大写输出" />
+                <el-switch v-model="autoCalculate" active-text="自动计算" />
               </div>
             </div>
-            <div class="hash-content">
-              <el-input 
-                v-model="item.value" 
-                type="textarea" 
-                :rows="item.algo === 'sha512' ? 3 : 2" 
-                readonly
-                :placeholder="loading ? '计算中...' : '无输入内容'" 
-                class="hash-output font-mono"
-                :class="{ uppercase: upper && item.value }"
-              />
+          </el-card>
+
+          <!-- 输入区域 -->
+          <el-card class="input-section">
+            <template #header>
+              <div class="card-header">
+                <span>输入文本</span>
+                <div class="input-stats">
+                  <span class="char-count">字符数: {{ input.length }}</span>
+                  <span class="byte-count">字节数: {{ getByteLength(input) }}</span>
+                </div>
+              </div>
+            </template>
+            <el-input 
+              v-model="input" 
+              type="textarea" 
+              :rows="20"
+              placeholder="请输入要计算哈希的原始文本（支持任意字符、中文、特殊符号等）" 
+              class="input-textarea font-mono"
+              @input="autoRun"
+              clearable
+            />
+            <div class="input-tips">
+              <el-icon><InfoFilled /></el-icon>
+              <span>支持中文、英文、数字、特殊符号等任意字符，输入后会自动计算哈希值</span>
             </div>
-          </div>
+          </el-card>
+        </div>
+
+        <!-- 右侧：哈希结果区域 -->
+        <div class="right-panel">
+          <el-card class="results-section">
+            <template #header>
+              <div class="card-header">
+                <span>哈希计算结果</span>
+              </div>
+            </template>
+            <div class="results-grid">
+              <div v-for="item in hashResults" :key="item.algo" class="hash-card">
+                <div class="hash-header">
+                  <div class="hash-info">
+                    <span class="hash-name">{{ item.label }}</span>
+                    <span class="hash-desc">{{ item.description }}</span>
+                  </div>
+                  <div class="hash-actions">
+                    <el-button 
+                      v-if="item.value" 
+                      size="small" 
+                      @click="copy(item.value)" 
+                      :loading="copying === item.algo"
+                      type="primary" 
+                      link
+                    >
+                      {{ copying === item.algo ? '已复制' : '复制' }}
+                    </el-button>
+                  </div>
+                </div>
+                <div class="hash-content">
+                  <el-input 
+                    v-model="item.value" 
+                    type="textarea" 
+                    :rows="item.algo === 'sha512' ? 2 : 1" 
+                    readonly
+                    :placeholder="loading ? '计算中...' : '无输入内容'" 
+                    class="hash-output font-mono"
+                    :class="{ uppercase: upper && item.value }"
+                  />
+                </div>
+              </div>
+            </div>
+          </el-card>
         </div>
       </div>
     </div>
@@ -250,36 +261,57 @@ watch(input, (val) => {
 .hash-tool {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   min-height: 100vh;
-  padding: 24px 0;
+  padding: 20px 0;
+  display: flex;
+  flex-direction: column;
 }
 
 .container {
-  max-width: 1200px;
+  max-width: 1600px;
   margin: 0 auto;
   padding: 0 20px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
 }
 
 .header {
   text-align: center;
-  margin-bottom: 32px;
+  margin-bottom: 12px;
   color: white;
 }
 
 .title {
-  font-size: 32px;
+  font-size: 28px;
   font-weight: 700;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .subtitle {
-  font-size: 16px;
+  font-size: 14px;
   opacity: 0.9;
   margin: 0;
 }
 
+/* 主内容区域：左右分栏布局 */
+.main-content {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  flex: 1;
+  min-height: 0;
+  align-items: stretch;
+}
+
+.left-panel, .right-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-height: 0;
+}
+
 .control-panel {
-  margin-bottom: 24px;
   border-radius: 12px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
@@ -299,9 +331,20 @@ watch(input, (val) => {
 }
 
 .input-section {
-  margin-bottom: 24px;
+  flex: 1;
+  min-height: 0;
   border-radius: 12px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+}
+
+:deep(.input-section .el-card__body) {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 16px;
 }
 
 .card-header {
@@ -313,9 +356,8 @@ watch(input, (val) => {
 
 .input-stats {
   display: flex;
-  gap: 16px;
-  font-size: 14px;
-  color: #666;
+  gap: 12px;
+  font-size: 12px;
 }
 
 .char-count, .byte-count {
@@ -328,42 +370,59 @@ watch(input, (val) => {
 .input-textarea {
   font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
   line-height: 1.5;
+  flex: 1;
+  min-height: 0;
+}
+
+:deep(.input-textarea .el-textarea__inner) {
+  height: 100%;
+  resize: none;
+  overflow-y: auto;
 }
 
 .input-tips {
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-top: 12px;
-  padding: 12px;
+  margin-top: 8px;
+  padding: 8px 12px;
   background: #f8f9fa;
-  border-radius: 8px;
-  font-size: 14px;
+  border-radius: 6px;
+  font-size: 12px;
   color: #666;
+  flex-shrink: 0;
 }
 
 .results-section {
-  margin-bottom: 24px;
+  flex: 1;
+  min-height: 0;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
 }
 
-.section-title {
-  font-size: 20px;
-  font-weight: 600;
-  color: white;
-  margin-bottom: 20px;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+:deep(.results-section .el-card__body) {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 16px;
 }
 
 .results-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-  gap: 20px;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
 }
 
 .hash-card {
   background: white;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   overflow: hidden;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
@@ -377,7 +436,7 @@ watch(input, (val) => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 16px 20px;
+  padding: 12px 16px;
   background: #f8f9fa;
   border-bottom: 1px solid #e9ecef;
 }
@@ -390,23 +449,28 @@ watch(input, (val) => {
 
 .hash-name {
   font-weight: 600;
-  font-size: 16px;
+  font-size: 14px;
   color: #333;
 }
 
 .hash-desc {
-  font-size: 12px;
+  font-size: 11px;
   color: #666;
 }
 
 .hash-content {
-  padding: 16px 20px;
+  padding: 12px 16px;
 }
 
 .hash-output {
   font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
-  font-size: 13px;
+  font-size: 12px;
   line-height: 1.4;
+}
+
+:deep(.hash-output .el-textarea__inner) {
+  padding: 8px;
+  font-size: 12px;
 }
 
 .uppercase {
@@ -414,6 +478,22 @@ watch(input, (val) => {
 }
 
 /* 响应式设计 */
+@media (max-width: 1200px) {
+  .main-content {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr;
+  }
+  
+  .left-panel {
+    max-height: 50vh;
+    overflow-y: auto;
+  }
+  
+  .right-panel {
+    min-height: 400px;
+  }
+}
+
 @media (max-width: 768px) {
   .container {
     padding: 0 16px;
@@ -430,10 +510,6 @@ watch(input, (val) => {
   
   .left-controls, .right-controls {
     justify-content: center;
-  }
-  
-  .results-grid {
-    grid-template-columns: 1fr;
   }
   
   .card-header {

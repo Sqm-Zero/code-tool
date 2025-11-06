@@ -7,122 +7,129 @@
         <p class="subtitle">比较两个文本的差异，高亮显示变化</p>
       </div>
 
-      <!-- 控制面板 -->
-      <el-card class="control-panel">
-        <template #header>
-          <div class="card-header">
-            <span>对比设置</span>
-            <div class="diff-stats">
-              <span class="diff-mode">{{ getDiffModeLabel() }}</span>
-              <span class="changes-count">{{ changesCount }} 处变化</span>
+      <!-- 主内容区域：左右分栏 -->
+      <div class="main-content">
+        <!-- 左侧：输入和控制 -->
+        <div class="left-panel">
+          <!-- 控制面板 -->
+          <el-card class="control-panel">
+            <template #header>
+              <div class="card-header">
+                <span>对比设置</span>
+                <div class="diff-stats">
+                  <span class="diff-mode">{{ getDiffModeLabel() }}</span>
+                  <span class="changes-count">{{ changesCount }} 处变化</span>
+                </div>
+              </div>
+            </template>
+            
+            <div class="controls">
+              <div class="action-buttons">
+                <el-button type="primary" @click="buildRendered" :disabled="!left.trim() || !right.trim()">
+                  开始对比
+                </el-button>
+                <el-button @click="clearAll" plain>
+                  清空
+                </el-button>
+              </div>
+              <div class="options">
+                <div class="mode-select">
+                  <label class="control-label">对比模式</label>
+                  <el-select v-model="diffMode" placeholder="选择对比模式" style="width: 120px">
+                    <el-option label="行级" value="lines" />
+                    <el-option label="词级" value="words" />
+                    <el-option label="字符级" value="chars" />
+                  </el-select>
+                </div>
+                <el-switch v-model="showWhitespace" active-text="显示空白字符" />
+                <el-switch v-model="ignoreCase" active-text="忽略大小写" />
+              </div>
             </div>
-          </div>
-        </template>
-        
-        <div class="controls">
-          <div class="action-buttons">
-            <el-button type="primary" @click="buildRendered" icon="Search" :disabled="!left.trim() || !right.trim()">
-              开始对比
-            </el-button>
-            <el-button @click="clearAll" icon="Delete" plain>
-              清空
-            </el-button>
-          </div>
-          <div class="options">
-            <div class="mode-select">
-              <label class="control-label">对比模式</label>
-              <el-select v-model="diffMode" placeholder="选择对比模式" style="width: 120px">
-                <el-option label="行级" value="lines" />
-                <el-option label="词级" value="words" />
-                <el-option label="字符级" value="chars" />
-              </el-select>
-            </div>
-            <el-switch v-model="showWhitespace" active-text="显示空白字符" />
-            <el-switch v-model="ignoreCase" active-text="忽略大小写" />
+          </el-card>
+
+          <!-- 输入区域 -->
+          <div class="input-section">
+            <el-card class="left-input">
+              <template #header>
+                <div class="card-header">
+                  <span>左侧文本（基准）</span>
+                  <div class="input-stats">
+                    <span class="char-count">{{ left.length }} 字符</span>
+                    <span class="line-count">{{ left.split('\n').length }} 行</span>
+                  </div>
+                </div>
+              </template>
+              <el-input 
+                v-model="left" 
+                type="textarea" 
+                :rows="20"
+                placeholder="输入基准文本..."
+                class="input-textarea font-mono"
+                @input="autoCompare"
+              />
+            </el-card>
+
+            <el-card class="right-input">
+              <template #header>
+                <div class="card-header">
+                  <span>右侧文本（目标）</span>
+                  <div class="input-stats">
+                    <span class="char-count">{{ right.length }} 字符</span>
+                    <span class="line-count">{{ right.split('\n').length }} 行</span>
+                  </div>
+                </div>
+              </template>
+              <el-input 
+                v-model="right" 
+                type="textarea" 
+                :rows="20"
+                placeholder="输入对比文本..."
+                class="input-textarea font-mono"
+                @input="autoCompare"
+              />
+            </el-card>
           </div>
         </div>
-      </el-card>
 
-      <!-- 输入区域 -->
-      <div class="input-section">
-        <el-card class="left-input">
-          <template #header>
-            <div class="card-header">
-              <span>左侧文本（基准）</span>
-              <div class="input-stats">
-                <span class="char-count">{{ left.length }} 字符</span>
-                <span class="line-count">{{ left.split('\n').length }} 行</span>
+        <!-- 右侧：结果展示 -->
+        <div class="right-panel">
+          <el-card class="results-section">
+            <template #header>
+              <div class="card-header">
+                <span>对比结果</span>
+                <div class="result-actions">
+                  <el-button 
+                    v-if="diffResult" 
+                    size="small" 
+                    @click="copyDiffResult" 
+                    :loading="copying"
+                    type="primary" 
+                    link
+                  >
+                    {{ copying ? '已复制' : '复制结果' }}
+                  </el-button>
+                </div>
               </div>
-            </div>
-          </template>
-          <el-input 
-            v-model="left" 
-            type="textarea" 
-            :rows="16" 
-            placeholder="输入基准文本..."
-            class="input-textarea font-mono"
-            @input="autoCompare"
-          />
-        </el-card>
-
-        <el-card class="right-input">
-          <template #header>
-            <div class="card-header">
-              <span>右侧文本（目标）</span>
-              <div class="input-stats">
-                <span class="char-count">{{ right.length }} 字符</span>
-                <span class="line-count">{{ right.split('\n').length }} 行</span>
+            </template>
+            
+            <div class="results-content">
+              <div v-if="!left && !right" class="empty-state">
+                <el-icon><Document /></el-icon>
+                <p>请输入要对比的文本</p>
               </div>
+              <div v-else-if="!left" class="empty-state">
+                <el-icon><Edit /></el-icon>
+                <p>请输入左侧基准文本</p>
+              </div>
+              <div v-else-if="!right" class="empty-state">
+                <el-icon><Edit /></el-icon>
+                <p>请输入右侧对比文本</p>
+              </div>
+              <div v-else class="diff-result" v-html="diffResult"></div>
             </div>
-          </template>
-          <el-input 
-            v-model="right" 
-            type="textarea" 
-            :rows="16" 
-            placeholder="输入对比文本..."
-            class="input-textarea font-mono"
-            @input="autoCompare"
-          />
-        </el-card>
+          </el-card>
+        </div>
       </div>
-
-      <!-- 对比结果区域 -->
-      <el-card class="results-section">
-        <template #header>
-          <div class="card-header">
-            <span>对比结果</span>
-            <div class="result-actions">
-              <el-button 
-                v-if="diffResult" 
-                size="small" 
-                @click="copyDiffResult" 
-                :loading="copying"
-                type="primary" 
-                link
-                icon="CopyDocument"
-              >
-                {{ copying ? '已复制' : '复制结果' }}
-              </el-button>
-            </div>
-          </div>
-        </template>
-        
-        <div class="results-content">
-          <div v-if="!left && !right" class="empty-state">
-            <el-icon><Document /></el-icon>
-            <p>请输入要对比的文本</p>
-          </div>
-          <div v-else-if="!left" class="empty-state">
-            <el-icon><Edit /></el-icon>
-            <p>请输入左侧基准文本</p>
-          </div>
-          <div v-else-if="!right" class="empty-state">
-            <el-icon><Edit /></el-icon>
-            <p>请输入右侧对比文本</p>
-          </div>
-          <div v-else class="diff-result" v-html="diffResult"></div>
-        </div>
-      </el-card>
     </div>
   </div>
 </template>
@@ -271,38 +278,102 @@ watch([showWhitespace, ignoreCase, diffMode], () => {
 .diff-tool {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   min-height: 100vh;
-  padding: 24px 0;
+  padding: 20px 0;
+  display: flex;
+  flex-direction: column;
 }
 
 .container {
-  max-width: 1200px;
+  max-width: 1600px;
   margin: 0 auto;
   padding: 0 20px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
 }
 
 .header {
   text-align: center;
-  margin-bottom: 32px;
+  margin-bottom: 20px;
   color: white;
 }
 
 .title {
-  font-size: 32px;
+  font-size: 28px;
   font-weight: 700;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .subtitle {
-  font-size: 16px;
+  font-size: 14px;
   opacity: 0.9;
   margin: 0;
 }
 
-.control-panel, .results-section {
-  margin-bottom: 24px;
+/* 主内容区域：左右分栏布局 */
+.main-content {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  flex: 1;
+  min-height: 0;
+  align-items: stretch;
+}
+
+.left-panel, .right-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  min-height: 0;
+}
+
+.control-panel {
   border-radius: 12px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.input-section {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  flex: 1;
+  min-height: 0;
+}
+
+.left-input, .right-input {
+  flex: 1;
+  min-height: 0;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+}
+
+:deep(.left-input .el-card__body),
+:deep(.right-input .el-card__body) {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+}
+
+.results-section {
+  flex: 1;
+  min-height: 0;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+}
+
+:deep(.results-section .el-card__body) {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
 }
 
 .card-header {
@@ -314,9 +385,8 @@ watch([showWhitespace, ignoreCase, diffMode], () => {
 
 .diff-stats, .input-stats {
   display: flex;
-  gap: 16px;
-  font-size: 14px;
-  color: #666;
+  gap: 12px;
+  font-size: 12px;
 }
 
 .diff-mode, .changes-count, .char-count, .line-count {
@@ -328,9 +398,7 @@ watch([showWhitespace, ignoreCase, diffMode], () => {
 
 .controls {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
+  flex-direction: column;
   gap: 16px;
 }
 
@@ -343,6 +411,7 @@ watch([showWhitespace, ignoreCase, diffMode], () => {
   display: flex;
   gap: 16px;
   align-items: center;
+  flex-wrap: wrap;
 }
 
 .mode-select {
@@ -357,25 +426,24 @@ watch([showWhitespace, ignoreCase, diffMode], () => {
   font-weight: 500;
 }
 
-.input-section {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 24px;
-  margin-bottom: 24px;
-}
-
-.left-input, .right-input {
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
-
 .input-textarea {
   font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
   line-height: 1.5;
+  flex: 1;
+  min-height: 0;
+}
+
+:deep(.input-textarea .el-textarea__inner) {
+  height: 100%;
+  resize: none;
+  overflow-y: auto;
 }
 
 .results-content {
-  min-height: 200px;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
 }
 
 .empty-state {
@@ -383,7 +451,7 @@ watch([showWhitespace, ignoreCase, diffMode], () => {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  height: 200px;
+  flex: 1;
   color: #666;
   text-align: center;
 }
@@ -409,7 +477,9 @@ watch([showWhitespace, ignoreCase, diffMode], () => {
   background: #f8f9fa;
   border-radius: 8px;
   border: 1px solid #e9ecef;
-  min-height: 200px;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
 }
 
 /* 对比结果高亮样式 */
@@ -446,6 +516,22 @@ watch([showWhitespace, ignoreCase, diffMode], () => {
 
 
 /* 响应式设计 */
+@media (max-width: 1200px) {
+  .main-content {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr;
+  }
+  
+  .left-panel {
+    max-height: 50vh;
+    overflow-y: auto;
+  }
+  
+  .right-panel {
+    min-height: 400px;
+  }
+}
+
 @media (max-width: 768px) {
   .container {
     padding: 0 16px;
@@ -465,7 +551,6 @@ watch([showWhitespace, ignoreCase, diffMode], () => {
   }
   
   .input-section {
-    grid-template-columns: 1fr;
     gap: 16px;
   }
   
