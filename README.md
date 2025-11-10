@@ -16,11 +16,11 @@
 ### 功能特性
 
 - **首页**: 动效与卡片展示
+![alt text](./img/image.png)
 - **工具集**:
   - 代码对比 `/tools/diff`
   - JSON 格式化 `/tools/json`
   - 代码格式化 `/tools/format`
-- **用户与通用页面**: 登录、404、测试页
 
 ### 快速开始
 
