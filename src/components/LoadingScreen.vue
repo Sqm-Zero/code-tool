@@ -290,7 +290,8 @@ onUnmounted(() => {
   width: 100%;
   height: 100%;
   transform: scale(1);
-  transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  transform-origin: center center;
+  transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
 /* 缩小到左下角状态 */
@@ -300,7 +301,8 @@ onUnmounted(() => {
   bottom: 20px;
   width: 15rem;
   transform: scale(1);
-  transition: all 0.8s cubic-bezier(0.2, 0, 0.1, 1);
+  transform-origin: bottom left;
+  transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   cursor: pointer;
   pointer-events: auto;
 }
@@ -332,7 +334,8 @@ onUnmounted(() => {
 .loading-gif {
   display: block;
   object-fit: contain;
-  transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  transform-origin: center center;
 }
 
 .loading-fullscreen .loading-gif {
@@ -340,12 +343,14 @@ onUnmounted(() => {
   height: auto;
   max-width: 100vw;
   max-height: 100vh;
+  transform-origin: center center;
 }
 
 .loading-minimized .loading-gif {
   width: 100%;
   height: 100%;
   border-radius: 8px;
+  transform-origin: bottom left;
 }
 
 .loading-collapsed .loading-gif {
